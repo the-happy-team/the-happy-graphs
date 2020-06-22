@@ -1,6 +1,9 @@
 let jsonA;
 let jsonC;
 
+let jsonALoaded = false;
+let jsonCLoaded = false;
+
 const Z_MAX = 500;
 const Z_FILTER = 0;
 
@@ -19,7 +22,7 @@ const CAM_ROT = {
 };
 
 const CAM_ZOOM = {
-  
+
 };
 
 function preload() {
@@ -68,29 +71,10 @@ function smoothEmotionValues(mj, emo) {
   }
 }
 
-function setup() { 
-  const cc = document.getElementById('canvas-container');
-  const mCanvas = createCanvas(cc.offsetWidth, cc.offsetHeight, WEBGL);
-  mCanvas.parent('canvas-container');
-  mCanvas.id('my-canvas');
-
-  smooth();
-  pixelDensity(2);
-  frameRate(10);
-  //noLoop();
-
-  CAM_TRANS.x = -0.66 * width;
-  CAM_TRANS.y = -0.22 * height;
-  CAM_TRANS.z = -500;
-
-  CAM_ROT.x = 0.8;
-  CAM_ROT.y = 0.2;
-  CAM_ROT.z = -1.1;
-
+function readNewJsonFiles() {
+  points.length = 0;
   preProcessJson(jsonA);
   preProcessJson(jsonC);
-
-
 
   for(let e of jsonA.header) {
     smoothEmotionValues(jsonA, e);
@@ -116,6 +100,28 @@ function setup() {
       }
     }
   }
+}
+
+function setup() { 
+  const cc = document.getElementById('canvas-container');
+  const mCanvas = createCanvas(cc.offsetWidth, cc.offsetHeight, WEBGL);
+  mCanvas.parent('canvas-container');
+  mCanvas.id('my-canvas');
+
+  smooth();
+  pixelDensity(2);
+  frameRate(10);
+  //noLoop();
+
+  CAM_TRANS.x = -0.66 * width;
+  CAM_TRANS.y = -0.22 * height;
+  CAM_TRANS.z = -500;
+
+  CAM_ROT.x = 0.8;
+  CAM_ROT.y = 0.2;
+  CAM_ROT.z = -1.1;
+
+  readNewJsonFiles();
 }
 
 function draw() {
@@ -168,3 +174,27 @@ function mouseDragged() {
   CAM_TRANS.x += dx/10;
   CAM_TRANS.y += dy/10;
 }
+
+$(() => {
+  $(".file-input").change((event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (readerEvent) => {
+      if(event.target.id === 'my-a-file') {
+        jsonA = JSON.parse(readerEvent.target.result);
+        jsonALoaded = true;
+      } else {
+        jsonC = JSON.parse(readerEvent.target.result);
+        jsonCLoaded = true;
+      }
+
+      if(jsonALoaded && jsonCLoaded) {
+        jsonALoaded = false;
+        jsonCLoaded = false;
+        readNewJsonFiles();
+      }
+    }
+    reader.readAsText(file);
+  });
+});
