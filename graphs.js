@@ -95,21 +95,28 @@ function setup() {
   for(let e of jsonA.header) {
     smoothEmotionValues(jsonA, e);
     smoothEmotionValues(jsonC, e);
-    points.push(jsonA.values[e]);
+    points.push([]);
+    points.push([]);
+    //points.push(jsonA.values[e]);
   }
 
-  // let maxPoints = 0;
-  //      if (z > Z_FILTER || zR > Z_FILTER) {
-  //        mPs.push(z);
-  //        mPsR.push(zR);
-  //      }
-  //    if (mPs.length > maxPoints) maxPoints = mPs.length;
-  //
-  //  for(let p = 0; p < points.length; p++) {
-  //    for(let x = points[p].length; x < maxPoints; x++) {
-  //      points[p].push(0);
-  //    }
-  //  }
+  for(let p = 0; p < jsonA.values['happy'].length && p < jsonC.values['happy'].length; p++) {
+    let aHasVal = false;
+    let cHasVal = false;
+
+    for(let e of jsonA.header) {
+      aHasVal |= (jsonA.values[e][p] > Z_FILTER);
+      cHasVal |= (jsonC.values[e][p] > Z_FILTER);
+    }
+
+    if (aHasVal || cHasVal) {
+      const emos = jsonA.header;
+      for(let ei = 0; ei < emos.length; ei++) {
+        points[2 * ei + 0].push(jsonA.values[emos[ei]][p]);
+        points[2 * ei + 1].push(jsonC.values[emos[ei]][p]);
+      }
+    }
+  }
 }
 
 function draw() {
