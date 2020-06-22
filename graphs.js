@@ -194,6 +194,7 @@ $(() => {
         jsonCLoaded = false;
         readNewJsonFiles();
       }
+      if (event.target) event.target.value = '';
     }
     reader.readAsText(file);
   });
