@@ -23,8 +23,8 @@ const CAM_ZOOM = {
 };
 
 function preload() {
-  jsonA = loadJSON('assets/__values-A.json');
-  jsonC = loadJSON('assets/__values-C.json');
+  jsonA = loadJSON('assets/values-A.json');
+  jsonC = loadJSON('assets/values-C.json');
 }
 
 function preProcessJson(mj) {

@@ -3,7 +3,7 @@ const points = [];
 const pointsR = [];
 
 function preload() {
-  mJson = loadJSON('../assets/__values-A.json');
+  mJson = loadJSON('../assets/values-A.json');
 }
 
 function setup() {
