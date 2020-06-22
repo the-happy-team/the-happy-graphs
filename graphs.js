@@ -1,101 +1,152 @@
 let mJson;
 const points = [];
 const pointsR = [];
-const AVG_SIZE_2 = 10;
-let Xrot = .8;
-let Zrot = .2;
+const AVG_SIZE_2 = 0;
+
+const CAM_TRANS = {
+  x: 0,
+  y: 0,
+  z: 0
+}
+
+const CAM_ROT = {
+  x: .8,
+  y: 0,
+  z: .2
+}
 
 function preload() {
-  mJson = loadJSON('../assets/__values-A.json');
+  mJson = loadJSON('../assets/__values-B.json');
 }
 
 function setup() { 
-  createCanvas(1280, 600, WEBGL);
-  noLoop();
+  const cc = document.getElementById('canvas-container');
+  const mCanvas = createCanvas(cc.offsetWidth, cc.offsetHeight, WEBGL);
+  mCanvas.parent('canvas-container');
+  mCanvas.id('my-canvas');
 
-  mJson.header = mJson.header.filter((e) => e!='time');
+  //noLoop();
+  smooth();
+  pixelDensity(1);
+  frameRate(10);
+
+  CAM_TRANS.x = -0.8 * width;
+  CAM_TRANS.y = -height;
+  CAM_TRANS.z = -200;
+
+  mJson.header = mJson.header.filter((e) => e != 'time');
   mJson.values['neutral'].reverse();
+
+  let maxPoints = 0;
 
   for(let ei = 0; ei < mJson.header.length; ei++) {
     const e = mJson.header[ei];
     const mVals = mJson.values[e];
+    const minVal = mJson.minVals[e];
+    const maxVal = mJson.maxVals[e];
     const mPs = [];
     const mPsR = [];
 
-    for(let vi = AVG_SIZE_2; vi < mVals.length; vi++) {
-      const viR = mVals.length - 1 - vi;
+    let lastZ = 0;
+    let lastZR = 0;
+
+    for(let vi = AVG_SIZE_2; vi < mVals.length - AVG_SIZE_2; vi++) {
+      const viR = mVals.length - AVG_SIZE_2 - 1 - vi;
 
       const x = map(vi, 0, mVals.length - 1, 0, width);
-      const y = map(ei, 0, mJson.header.length - 2, 0, height);
-
-      //const xR = map(vi, 0, mVals.length - 1, 0, width);
-      //const yR = map(ei, 0, mJson.header.length - 2, 0, height);
+      const y = map(ei, 0, mJson.header.length - 1, 0, height);
 
       let zsum = 0;
-      let zsumR = 0;
-      for(let z = vi - AVG_SIZE_2; z < vi + AVG_SIZE_2; z++) {
-        zsum += map(mVals[vi], mJson.minVals[e], mJson.maxVals[e], 0, 200);
-        zsumR += map(mVals[viR], mJson.minVals[e], mJson.maxVals[e], 0, 200);
+      for(let zi = vi - AVG_SIZE_2; zi < vi + AVG_SIZE_2 + 1; zi++) {
+        zsum += map(mVals[zi], minVal, maxVal, 0, 200);
       }
+      let z = Math.max(zsum/(2 * AVG_SIZE_2 + 1), 0.666 * lastZ);
+      lastZ = z;
 
-      const z = zsum/(2 * AVG_SIZE_2);
-      const zR = zsumR/(2 * AVG_SIZE_2);
+      let zsumR = 0;
+      for(let zi = viR - AVG_SIZE_2; zi < viR + AVG_SIZE_2 + 1; zi++) {
+        zsumR += map(mVals[zi], minVal, maxVal, 0, 200);
+      }
+      let zR = Math.max(zsumR / (2 * AVG_SIZE_2 + 1), 0.666 * lastZR);
+      lastZR = zR;
 
-      if(e === 'neutral') {
-        mPs.push(createVector(x, y, 250-z));
-        mPsR.push(createVector(x, y, 250-zR));
-      } else {
-        mPs.push(createVector(x, y, z));
-        mPsR.push(createVector(x, y, zR));
+      if (e === 'neutral') {
+        z = 200 - z;
+        zR = 200 - zR;
+      }
+      if(z > 40 || zR > 40) {
+        mPs.push(z);
+        mPsR.push(zR);
       }
     }
+
     points.push(mPs);
-    pointsR.push(mPsR);
+    pointsR.push(mPsR.reverse());
+    if (mPs.length > maxPoints) maxPoints = mPs.length;
   }
-  drawGraph();
+
+  for(let p = 0; p < points.length; p++) {
+    for(let x = points[p].length; x < maxPoints; x++) {
+      points[p].push(0);
+      pointsR[p].push(0);
+    }
+  }
 }
 
-function drawGraph() {
+function draw() {
+  smooth();
+  pixelDensity(1);
   background(0);
   strokeWeight(3);
   stroke(255);
+
   push();
-  rotateX(Xrot);
-  rotateZ(Zrot);
-  translate(-0.8 * width, -height, -200);
+  rotateX(CAM_ROT.x);
+  rotateZ(CAM_ROT.z);
+  translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
+
+  const gridStep = Math.max(height / points.length, width / points[0].length);
 
   for(let h = 1; h < points.length; h++) {
-    let backW = points[0].length - 1;
-
-    const lastZ = [
-      points[0][0].z,
-      points[0][0].z,
-      points[0][0].z
-    ];
+    const y0 = gridStep * (h - 0);
+    const y1 = gridStep * (h - 1);
 
     for(let w = 1; w < points[h].length; w++) {
-      const thisZ = [
-        Math.max(points[h-0][w].z, 0.5 * pointsR[h-0][w].z, 0.5 * lastZ[0]),
-        Math.max(points[h-1][w].z, 0.5 * pointsR[h-1][w].z, 0.5 * lastZ[1]),
-        Math.max(points[h][w-1].z, 0.5 * pointsR[h][w-1].z, 0.5 * lastZ[2])
-      ];
+      const x0 = gridStep * (w - 0);
+      const x1 = gridStep * (w - 1);
 
-      line(points[h][w].x, points[h][w].y, thisZ[0],
-           points[h-1][w].x, points[h-1][w].y, thisZ[1]);
-      line(points[h][w].x, points[h][w].y, thisZ[0],
-           points[h][w-1].x, points[h][w-1].y, thisZ[2]);
-      fill(255,0,0);
+      line(x0, y0, Math.max(points[h][w], pointsR[h][w]),
+           x0, y1, Math.max(points[h-1][w], pointsR[h-1][w]));
 
-      for (let i = 0; i < thisZ.length; i++) {
-        lastZ[i] = thisZ[i];
-      }
+      line(x0, y0, Math.max(points[h][w], pointsR[h][w]),
+           x1, y0, Math.max(points[h][w-1], pointsR[h][w-1]));
     }
+  }
+
+  for(let h = 1; h < points.length; h++) {
+    const y0 = gridStep * (h - 0);
+    const y1 = gridStep * (h - 1);
+    line(0, y0, Math.max(points[h][0], pointsR[h][0]),
+         0, y1, Math.max(points[h-1][0], pointsR[h-1][0]));
+  }
+
+  for(let w = 1; w < points[0].length; w++) {
+    const x0 = gridStep * (w - 0);
+    const x1 = gridStep * (w - 1);
+    line(x0, 0, Math.max(points[0][w], pointsR[0][w]),
+         x1, 0, Math.max(points[0][w-1], pointsR[0][w-1]));
   }
   pop();
 }
 
-function mouseDragged() {
-  Xrot = map(mouseY, 0, width, PI/2, -PI/2);
-  Zrot = map(mouseX, 0, width, PI/2, -PI/2);
-  drawGraph();
+function keyPressed() {
+  if(key === 'ArrowUp') {
+    CAM_TRANS.y += 5;
+  } else if(key === 'ArrowDown') {
+    CAM_TRANS.y -= 5;
+  } else if(key === 'ArrowLeft') {
+    CAM_TRANS.x += 5;
+  } else if(key === 'ArrowRight') {
+    CAM_TRANS.x -= 5;
+  }
 }
