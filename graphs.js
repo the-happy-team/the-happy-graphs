@@ -23,8 +23,8 @@ const CAM_ZOOM = {
 };
 
 function preload() {
-  jsonA = loadJSON('../assets/__values-A.json');
-  jsonC = loadJSON('../assets/__values-C.json');
+  jsonA = loadJSON('assets/__values-A.json');
+  jsonC = loadJSON('assets/__values-C.json');
 }
 
 function preProcessJson(mj) {
@@ -97,7 +97,6 @@ function setup() {
     smoothEmotionValues(jsonC, e);
     points.push([]);
     points.push([]);
-    //points.push(jsonA.values[e]);
   }
 
   for(let p = 0; p < jsonA.values['happy'].length && p < jsonC.values['happy'].length; p++) {
