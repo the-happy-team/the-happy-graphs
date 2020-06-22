@@ -1,7 +1,9 @@
 let jsonA;
 let jsonC;
+
+const MAX_Z = 200;
+
 const points = [];
-const pointsR = [];
 
 const CAM_TRANS = {
   x: 0,
@@ -23,10 +25,6 @@ function preload() {
 function preProcessJson(mj) {
   mj.header = mj.header.filter((e) => e != 'time');
   mj.values['neutral'].reverse();
-}
-
-function averageValues(vals) {
-  
 }
 
 function setup() { 
@@ -68,33 +66,36 @@ function setup() {
       const x = map(vi, 0, mVals.length - 1, 0, width);
       const y = map(ei, 0, jsonA.header.length - 1, 0, height);
 
-      const thisZ = map(mVals[vi], minVal, maxVal, 0, 200);
-      let z = Math.max(thisZ, 0.666 * lastZ);
+      const thisZ = map(mVals[vi], minVal, maxVal, 0, MAX_Z);
+      let z = Math.max(thisZ, 0.7 * lastZ);
       lastZ = z;
 
-      const thisZr = map(mVals[viR], minVal, maxVal, 0, 200);
-      let zR = Math.max(thisZr, 0.666 * lastZR);
+      const thisZR = map(mVals[viR], minVal, maxVal, 0, MAX_Z);
+      let zR = Math.max(thisZR, 0.7 * lastZR);
       lastZR = zR;
 
       if (e === 'neutral') {
-        z = 200 - z;
-        zR = 200 - zR;
+        z = MAX_Z - z;
+        zR = MAX_Z - zR;
       }
-      if(z > 40 || zR > 40) {
+      if (z > 4 || zR > 4) {
         mPs.push(z);
         mPsR.push(zR);
       }
     }
 
+    mPsR.reverse();
+    for(let i = 0; i < mPs.length; i++) {
+      mPs[i] = Math.max(mPs[i], mPsR[i]);
+    }
     points.push(mPs);
-    pointsR.push(mPsR.reverse());
+
     if (mPs.length > maxPoints) maxPoints = mPs.length;
   }
 
   for(let p = 0; p < points.length; p++) {
     for(let x = points[p].length; x < maxPoints; x++) {
       points[p].push(0);
-      pointsR[p].push(0);
     }
   }
 }
@@ -122,26 +123,21 @@ function draw() {
       const x0 = gridStep * (w - 0);
       const x1 = gridStep * (w - 1);
 
-      line(x0, y0, Math.max(points[h][w], pointsR[h][w]),
-           x0, y1, Math.max(points[h-1][w], pointsR[h-1][w]));
-
-      line(x0, y0, Math.max(points[h][w], pointsR[h][w]),
-           x1, y0, Math.max(points[h][w-1], pointsR[h][w-1]));
+      line(x0, y0, points[h][w], x0, y1, points[h-1][w]);
+      line(x0, y0, points[h][w], x1, y0, points[h][w-1]);
     }
   }
 
   for(let h = 1; h < points.length; h++) {
     const y0 = gridStep * (h - 0);
     const y1 = gridStep * (h - 1);
-    line(0, y0, Math.max(points[h][0], pointsR[h][0]),
-         0, y1, Math.max(points[h-1][0], pointsR[h-1][0]));
+    line(0, y0, points[h][0], 0, y1, points[h-1][0]);
   }
 
   for(let w = 1; w < points[0].length; w++) {
     const x0 = gridStep * (w - 0);
     const x1 = gridStep * (w - 1);
-    line(x0, 0, Math.max(points[0][w], pointsR[0][w]),
-         x1, 0, Math.max(points[0][w-1], pointsR[0][w-1]));
+    line(x0, 0, points[0][w], x1, 0, points[0][w-1]);
   }
   pop();
 }
