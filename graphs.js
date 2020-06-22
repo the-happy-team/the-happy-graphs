@@ -139,14 +139,19 @@ function draw() {
   pop();
 }
 
-function keyPressed() {
-  if(key === 'ArrowUp') {
-    CAM_TRANS.y += 5;
-  } else if(key === 'ArrowDown') {
-    CAM_TRANS.y -= 5;
-  } else if(key === 'ArrowLeft') {
-    CAM_TRANS.x += 5;
-  } else if(key === 'ArrowRight') {
-    CAM_TRANS.x -= 5;
-  }
+const click = {
+  x:0,
+  y:0
+}
+
+function mousePressed() {
+  click.x = mouseX;
+  click.y = mouseY;
+}
+
+function mouseDragged() {
+  const dx = mouseX - click.x;
+  const dy = mouseY - click.y;
+  CAM_TRANS.x += dx/10;
+  CAM_TRANS.y += dy/10;
 }
