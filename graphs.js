@@ -1,7 +1,7 @@
-let mJson;
+let jsonA;
+let jsonC;
 const points = [];
 const pointsR = [];
-const AVG_SIZE_2 = 0;
 
 const CAM_TRANS = {
   x: 0,
@@ -10,13 +10,23 @@ const CAM_TRANS = {
 }
 
 const CAM_ROT = {
-  x: .8,
+  x: 0,
   y: 0,
-  z: .2
+  z: 0
 }
 
 function preload() {
-  mJson = loadJSON('../assets/__values-B.json');
+  jsonA = loadJSON('../assets/__values-A.json');
+  jsonC = loadJSON('../assets/__values-C.json');
+}
+
+function preProcessJson(mj) {
+  mj.header = mj.header.filter((e) => e != 'time');
+  mj.values['neutral'].reverse();
+}
+
+function averageValues(vals) {
+  
 }
 
 function setup() { 
@@ -25,49 +35,45 @@ function setup() {
   mCanvas.parent('canvas-container');
   mCanvas.id('my-canvas');
 
-  //noLoop();
   smooth();
-  pixelDensity(1);
+  pixelDensity(2);
   frameRate(10);
 
-  CAM_TRANS.x = -0.8 * width;
-  CAM_TRANS.y = -height;
-  CAM_TRANS.z = -200;
+  CAM_TRANS.x = -0.66 * width;
+  CAM_TRANS.y = -0.22 * height;
+  CAM_TRANS.z = -500;
 
-  mJson.header = mJson.header.filter((e) => e != 'time');
-  mJson.values['neutral'].reverse();
+  CAM_ROT.x = 0.8;
+  CAM_ROT.y = 0.2;
+  CAM_ROT.z = -1.1;
+
+  preProcessJson(jsonA);
 
   let maxPoints = 0;
 
-  for(let ei = 0; ei < mJson.header.length; ei++) {
-    const e = mJson.header[ei];
-    const mVals = mJson.values[e];
-    const minVal = mJson.minVals[e];
-    const maxVal = mJson.maxVals[e];
+  for(let ei = 0; ei < jsonA.header.length; ei++) {
+    const e = jsonA.header[ei];
+    const mVals = jsonA.values[e];
+    const minVal = jsonA.minVals[e];
+    const maxVal = jsonA.maxVals[e];
     const mPs = [];
     const mPsR = [];
 
     let lastZ = 0;
     let lastZR = 0;
 
-    for(let vi = AVG_SIZE_2; vi < mVals.length - AVG_SIZE_2; vi++) {
-      const viR = mVals.length - AVG_SIZE_2 - 1 - vi;
+    for(let vi = 0; vi < mVals.length; vi++) {
+      const viR = mVals.length - 1 - vi;
 
       const x = map(vi, 0, mVals.length - 1, 0, width);
-      const y = map(ei, 0, mJson.header.length - 1, 0, height);
+      const y = map(ei, 0, jsonA.header.length - 1, 0, height);
 
-      let zsum = 0;
-      for(let zi = vi - AVG_SIZE_2; zi < vi + AVG_SIZE_2 + 1; zi++) {
-        zsum += map(mVals[zi], minVal, maxVal, 0, 200);
-      }
-      let z = Math.max(zsum/(2 * AVG_SIZE_2 + 1), 0.666 * lastZ);
+      const thisZ = map(mVals[vi], minVal, maxVal, 0, 200);
+      let z = Math.max(thisZ, 0.666 * lastZ);
       lastZ = z;
 
-      let zsumR = 0;
-      for(let zi = viR - AVG_SIZE_2; zi < viR + AVG_SIZE_2 + 1; zi++) {
-        zsumR += map(mVals[zi], minVal, maxVal, 0, 200);
-      }
-      let zR = Math.max(zsumR / (2 * AVG_SIZE_2 + 1), 0.666 * lastZR);
+      const thisZr = map(mVals[viR], minVal, maxVal, 0, 200);
+      let zR = Math.max(thisZr, 0.666 * lastZR);
       lastZR = zR;
 
       if (e === 'neutral') {
@@ -95,15 +101,16 @@ function setup() {
 
 function draw() {
   smooth();
-  pixelDensity(1);
+  pixelDensity(2);
   background(0);
   strokeWeight(3);
   stroke(255);
 
   push();
-  rotateX(CAM_ROT.x);
-  rotateZ(CAM_ROT.z);
   translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
+  rotateX(CAM_ROT.x);
+  rotateY(CAM_ROT.y);
+  rotateZ(CAM_ROT.z);
 
   const gridStep = Math.max(height / points.length, width / points[0].length);
 
