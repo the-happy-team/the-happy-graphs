@@ -115,23 +115,24 @@ function draw() {
   background(0);
   strokeWeight(3);
   stroke(255);
+  fill(255,105,180);
 
   translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
 
-  for(let h = 0; h < points.length; h++) {
-    const y0 = gridStep * (h - 0);
-    const y1 = gridStep * (h - 1);
+  for(let h = 0; h < points.length - 1; h++) {
+    const y0 = gridStep * (h + 0);
+    const y1 = gridStep * (h + 1);
 
-    for(let w = 0; w < points[h].length; w++) {
-      const x0 = gridStep * (w - 0);
-      const x1 = gridStep * (w - 1);
+    for(let w = 0; w < points[h].length - 1; w++) {
+      const x0 = gridStep * (w + 0);
+      const x1 = gridStep * (w + 1);
 
-      if (h > 0) {
-        line(x0, y0, points[h][w], x0, y1, points[h-1][w]);
-      }
-      if (w > 0) {
-        line(x0, y0, points[h][w], x1, y0, points[h][w-1]);
-      }
+      beginShape();
+      vertex(x0, y0, points[h][w]);
+      vertex(x1, y0, points[h][w + 1]);
+      vertex(x1, y1, points[h + 1][w + 1]);
+      vertex(x0, y1, points[h + 1][w]);
+      endShape(CLOSE);
     }
   }
 }
