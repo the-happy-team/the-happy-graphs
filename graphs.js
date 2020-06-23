@@ -8,6 +8,7 @@ const Z_MAX = 500;
 const Z_FILTER = 50;
 
 const points = [];
+let gridStep;
 
 let easycam;
 const CAM_TRANS = {
@@ -91,6 +92,11 @@ function readNewJsonFiles() {
       }
     }
   }
+
+  gridStep = Math.max(height / points.length, width / points[0].length);
+  CAM_TRANS.x = -0.5 * gridStep * points[0].length;
+  CAM_TRANS.y = -0.5 * gridStep * points.length;
+  CAM_TRANS.z = -500;
 }
 
 function setup() { 
@@ -102,10 +108,6 @@ function setup() {
 
   easycam = new Dw.EasyCam(this._renderer);
 
-  CAM_TRANS.x = -2.5 * width;
-  CAM_TRANS.y = -0.5 * height;
-  CAM_TRANS.z = -500;
-
   readNewJsonFiles();
 }
 
@@ -115,8 +117,6 @@ function draw() {
   stroke(255);
 
   translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
-
-  const gridStep = Math.max(height / points.length, width / points[0].length);
 
   for(let h = 0; h < points.length; h++) {
     const y0 = gridStep * (h - 0);
