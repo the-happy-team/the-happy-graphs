@@ -6,11 +6,13 @@ function preload() {
   mJson = loadJSON('../assets/values-A.json');
 }
 
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  drawGraph();
+}
+
 function setup() {
-  const cc = document.getElementById('canvas-container');
-  const mCanvas = createCanvas(cc.offsetWidth, cc.offsetHeight);
-  mCanvas.parent('canvas-container');
-  mCanvas.id('my-canvas');
+  createCanvas(windowWidth, windowHeight);
 
   smooth();
   pixelDensity(2);
