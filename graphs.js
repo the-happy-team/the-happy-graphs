@@ -5,24 +5,15 @@ let jsonALoaded = false;
 let jsonCLoaded = false;
 
 const Z_MAX = 500;
-const Z_FILTER = 0;
+const Z_FILTER = 50;
 
 const points = [];
 
+let easycam;
 const CAM_TRANS = {
   x: 0,
   y: 0,
   z: 0
-};
-
-const CAM_ROT = {
-  x: 0,
-  y: 0,
-  z: 0
-};
-
-const CAM_ZOOM = {
-
 };
 
 function preload() {
@@ -50,11 +41,11 @@ function smoothEmotionValues(mj, emo) {
     const iR = mVals.length - 1 - i;
 
     const thisZ = map(mVals[i], minVal, maxVal, 0, Z_MAX);
-    let z = Math.max(thisZ, 0.7 * lastZ);
+    let z = Math.max(thisZ, random(0.4, 0.6) * lastZ);
     lastZ = z;
 
     const thisZR = map(mVals[iR], minVal, maxVal, 0, Z_MAX);
-    let zR = Math.max(thisZR, 0.7 * lastZR);
+    let zR = Math.max(thisZR, random(0.4, 0.6) * lastZR);
     lastZR = zR;
 
     if (emo === 'neutral') {
@@ -103,39 +94,27 @@ function readNewJsonFiles() {
 }
 
 function setup() { 
-  const cc = document.getElementById('canvas-container');
-  const mCanvas = createCanvas(cc.offsetWidth, cc.offsetHeight, WEBGL);
-  mCanvas.parent('canvas-container');
-  mCanvas.id('my-canvas');
-
+  createCanvas(windowWidth, windowHeight, WEBGL);
+  setAttributes('antialias', true);
   smooth();
   pixelDensity(2);
-  frameRate(10);
-  //noLoop();
+  randomSeed(1010);
 
-  CAM_TRANS.x = -0.66 * width;
-  CAM_TRANS.y = -0.22 * height;
+  easycam = new Dw.EasyCam(this._renderer);
+
+  CAM_TRANS.x = -2.5 * width;
+  CAM_TRANS.y = -0.5 * height;
   CAM_TRANS.z = -500;
-
-  CAM_ROT.x = 0.8;
-  CAM_ROT.y = 0.2;
-  CAM_ROT.z = -1.1;
 
   readNewJsonFiles();
 }
 
 function draw() {
-  smooth();
-  pixelDensity(2);
   background(0);
   strokeWeight(3);
   stroke(255);
 
-  push();
   translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
-  rotateX(CAM_ROT.x);
-  rotateY(CAM_ROT.y);
-  rotateZ(CAM_ROT.z);
 
   const gridStep = Math.max(height / points.length, width / points[0].length);
 
@@ -155,24 +134,11 @@ function draw() {
       }
     }
   }
-  pop();
 }
 
-const click = {
-  x:0,
-  y:0
-}
-
-function mousePressed() {
-  click.x = mouseX;
-  click.y = mouseY;
-}
-
-function mouseDragged() {
-  const dx = mouseX - click.x;
-  const dy = mouseY - click.y;
-  CAM_TRANS.x += dx/10;
-  CAM_TRANS.y += dy/10;
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  easycam.setViewport([0,0,windowWidth, windowHeight]);
 }
 
 $(() => {
