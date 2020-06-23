@@ -119,11 +119,11 @@ function draw() {
 
   translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
 
-  pointLight(250, 0, 0,   -CAM_TRANS.x/2, 0, -300);
-  pointLight(0, 250, 0,   -CAM_TRANS.x, 0,   -300);
-  pointLight(0, 0, 250,   0, 0,              -300);
-  pointLight(250, 250, 0, CAM_TRANS.x, 0,    -300);
-  pointLight(250, 0, 250, CAM_TRANS.x/2, 0,  -300);
+  pointLight(250, 0, 0,   -CAM_TRANS.x/2, 0, 50);
+  pointLight(0, 250, 0,   -CAM_TRANS.x, 0,   50);
+  pointLight(0, 0, 250,   0, 0,              50);
+  pointLight(250, 250, 0, CAM_TRANS.x, 0,    50);
+  pointLight(250, 0, 250, CAM_TRANS.x/2, 0,  50);
 
   for(let h = 0; h < points.length - 1; h++) {
     const y0 = gridStep * (h + 0);
