@@ -6,7 +6,7 @@ let jsonALoaded = false;
 let jsonCLoaded = false;
 
 const Z_MAX = 500;
-const Z_FILTER = 50;
+const V_FILTER = 0.005;
 
 const points = [];
 let gridStep;
@@ -31,7 +31,37 @@ function preload() {
 
 function preProcessJson(mj) {
   mj.header = mj.header.filter((e) => e != 'time');
+  mj.values['neutral'].forEach((v, i, arr) => arr[i] = (1.0 - v));
   mj.values['neutral'].reverse();
+
+  for(let e of jsonA.header) {
+    jsonA.values[`${e}_f`] = [];
+    jsonC.values[`${e}_f`] = [];
+  }
+
+  for(let p = 0; p < jsonA.values['happy'].length && p < jsonC.values['happy'].length; p++) {
+    let aHasVal = false;
+    let cHasVal = false;
+
+    for(let e of jsonA.header) {
+      aHasVal |= (jsonA.values[e][p] > V_FILTER);
+      cHasVal |= (jsonC.values[e][p] > V_FILTER);
+    }
+
+    if (aHasVal || cHasVal) {
+      for(let e of jsonA.header) {
+        jsonA.values[`${e}_f`].push(jsonA.values[e][p]);
+        jsonC.values[`${e}_f`].push(jsonC.values[e][p]);
+      }
+    }
+  }
+
+  for(let e of jsonA.header) {
+    jsonA.values[`${e}`] = jsonA.values[`${e}_f`];
+    jsonC.values[`${e}`] = jsonC.values[`${e}_f`];
+    delete jsonA.values[`${e}_f`];
+    delete jsonC.values[`${e}_f`];
+  }
 }
 
 function smoothEmotionValues(mj, emo) {
@@ -49,17 +79,13 @@ function smoothEmotionValues(mj, emo) {
     const iR = mVals.length - 1 - i;
 
     const thisZ = map(mVals[i], minVal, maxVal, 0, Z_MAX);
-    let z = Math.max(thisZ, random(0.4, 0.6) * lastZ);
+    let z = Math.max(thisZ, random(0.3, 0.5) * lastZ);
     lastZ = z;
 
     const thisZR = map(mVals[iR], minVal, maxVal, 0, Z_MAX);
-    let zR = Math.max(thisZR, random(0.4, 0.6) * lastZR);
+    let zR = Math.max(thisZR, random(0.3, 0.5) * lastZR);
     lastZR = zR;
 
-    if (emo === 'neutral') {
-      z = Z_MAX - z;
-      zR = Z_MAX - zR;
-    }
     points.push(z);
     pointsR.push(zR);
   }
@@ -83,20 +109,10 @@ function readNewJsonFiles() {
   }
 
   for(let p = 0; p < jsonA.values['happy'].length && p < jsonC.values['happy'].length; p++) {
-    let aHasVal = false;
-    let cHasVal = false;
-
-    for(let e of jsonA.header) {
-      aHasVal |= (jsonA.values[e][p] > Z_FILTER);
-      cHasVal |= (jsonC.values[e][p] > Z_FILTER);
-    }
-
-    if (aHasVal || cHasVal) {
-      const emos = jsonA.header;
-      for(let ei = 0; ei < emos.length; ei++) {
-        points[2 * ei + 0].push(jsonA.values[emos[ei]][p]);
-        points[2 * ei + 1].push(jsonC.values[emos[ei]][p]);
-      }
+    for(let ei = 0; ei < jsonA.header.length; ei++) {
+      const e = jsonA.header[ei];
+      points[2 * ei + 0].push(jsonA.values[`${e}`][p]);
+      points[2 * ei + 1].push(jsonC.values[`${e}`][p]);
     }
   }
 
