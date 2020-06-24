@@ -26,7 +26,7 @@ const CAM_TRANS = {
 function preload() {
   jsonA = loadJSON('assets/values-A.json');
   jsonC = loadJSON('assets/values-C.json');
-  mImg = loadImage('assets/tgh.jpg');
+  //mImg = loadImage('assets/texture.jpg');
 }
 
 function preProcessJson(mj) {
