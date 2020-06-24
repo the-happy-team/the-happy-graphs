@@ -194,7 +194,7 @@ $(() => {
         jsonCLoaded = true;
       }
 
-      if(jsonALoaded && jsonCLoaded) {
+      if(jsonALoaded || jsonCLoaded) {
         jsonALoaded = false;
         jsonCLoaded = false;
         readNewJsonFiles();
