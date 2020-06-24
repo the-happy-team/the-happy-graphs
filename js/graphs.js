@@ -189,14 +189,19 @@ $(() => {
       if(event.target.id === 'my-a-file') {
         jsonA = JSON.parse(readerEvent.target.result);
         jsonALoaded = true;
+        event.target.classList.add('file-input-disable');
       } else {
         jsonC = JSON.parse(readerEvent.target.result);
         jsonCLoaded = true;
+        event.target.classList.add('file-input-disable');
       }
 
       if(jsonALoaded && jsonCLoaded) {
         jsonALoaded = false;
         jsonCLoaded = false;
+        document.getElementById('my-a-file').classList.remove('file-input-disable');
+        document.getElementById('my-c-file').classList.remove('file-input-disable');
+
         readNewJsonFiles();
       }
       if (event.target) event.target.value = '';
