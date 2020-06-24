@@ -20,7 +20,7 @@ const CAM_TRANS = {
 };
 
 function preload() {
-  mImg = loadImage('assets/tgha.jpg');
+  mImg = loadImage('assets/tgh.jpg');
 }
 
 function preProcessJson(mj) {
