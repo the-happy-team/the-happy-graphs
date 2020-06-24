@@ -13,7 +13,8 @@ let gridStep;
 let maxDim;
 
 let easycam;
-let LIGHTS = true;
+let COLORS = false;
+let TEXTURE = false;
 let TILE = false;
 
 const CAM_TRANS = {
@@ -126,16 +127,20 @@ function draw() {
 
   translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
 
-  if (LIGHTS) {
+  if (COLORS) {
     fill(255);
     pointLight(250, 0, 0,   -CAM_TRANS.x/2, 0, 50);
     pointLight(0, 250, 0,   -CAM_TRANS.x, 0,   50);
     pointLight(0, 0, 250,   0, 0,              50);
     pointLight(250, 250, 0, CAM_TRANS.x, 0,    50);
     pointLight(250, 0, 250, CAM_TRANS.x/2, 0,  50);
-  } else {
+  } else if (TEXTURE) {
     texture(mImg);
     textureMode(NORMAL);
+  } else {
+    fill(64);
+    stroke(255);
+    ambientLight(200,200,200);
   }
 
   for(let h = 0; h < points.length - 1; h++) {
@@ -152,8 +157,9 @@ function draw() {
       const x0n = x0 / maxDim;
       const x1n = x1 / maxDim;
 
+      push();
       beginShape();
-      if (LIGHTS) {
+      if (!TILE && !TEXTURE) {
         vertex(x0, y0, points[h][w]);
         vertex(x1, y0, points[h][w + 1]);
         vertex(x1, y1, points[h + 1][w + 1]);
@@ -164,13 +170,14 @@ function draw() {
         vertex(x1, y0, points[h][w + 1], 1, 0);
         vertex(x1, y1, points[h + 1][w + 1], 1, 1);
         vertex(x0, y1, points[h + 1][w], 0, 1);
-      } else {
+      } else if (TEXTURE) {
         vertex(x0, y0, points[h][w], x0n, y0n);
         vertex(x1, y0, points[h][w + 1], x1n, y0n);
         vertex(x1, y1, points[h + 1][w + 1], x1n, y1n);
         vertex(x0, y1, points[h + 1][w], x0n, y1n);
       }
       endShape(CLOSE);
+      pop();
     }
   }
 }
@@ -207,5 +214,9 @@ $(() => {
       if (event.target) event.target.value = '';
     }
     reader.readAsText(file);
+  });
+
+  $('#my-color-box').click(() => {
+    COLORS = $('#my-color-box').is(":checked");
   });
 });
