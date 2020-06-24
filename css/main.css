@@ -24,3 +24,7 @@ html, body {
 canvas {
   z-index: 0;
 }
+
+input[type=checkbox] {
+  margin: 0 32px 0 0;
+}

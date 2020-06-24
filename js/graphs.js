@@ -13,6 +13,13 @@ let gridStep;
 let maxDim;
 
 let easycam;
+
+const DISPLAY = {
+  LIGHTS: false,
+  TEXTURE: false,
+  TILE: false
+};
+
 let COLORS = false;
 let TEXTURE = false;
 let TILE = false;
@@ -26,7 +33,7 @@ const CAM_TRANS = {
 function preload() {
   jsonA = loadJSON('assets/values-A.json');
   jsonC = loadJSON('assets/values-C.json');
-  //mImg = loadImage('assets/texture.jpg');
+  mImg = loadImage('assets/texture.jpg');
 }
 
 function preProcessJson(mj) {
@@ -143,14 +150,14 @@ function draw() {
 
   translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
 
-  if (COLORS) {
+  if (DISPLAY.LIGHTS) {
     fill(255);
     pointLight(250, 0, 0,   -CAM_TRANS.x/2, 0, 50);
     pointLight(0, 250, 0,   -CAM_TRANS.x, 0,   50);
     pointLight(0, 0, 250,   0, 0,              50);
     pointLight(250, 250, 0, CAM_TRANS.x, 0,    50);
     pointLight(250, 0, 250, CAM_TRANS.x/2, 0,  50);
-  } else if (TEXTURE) {
+  } else if (DISPLAY.TEXTURE || DISPLAY.TILE) {
     texture(mImg);
     textureMode(NORMAL);
   } else {
@@ -175,22 +182,21 @@ function draw() {
 
       push();
       beginShape();
-      if (!TILE && !TEXTURE) {
-        vertex(x0, y0, points[h][w]);
-        vertex(x1, y0, points[h][w + 1]);
-        vertex(x1, y1, points[h + 1][w + 1]);
-        vertex(x0, y1, points[h + 1][w]);
-      }
-      else if (TILE) {
+      if (DISPLAY.TILE) {
         vertex(x0, y0, points[h][w], 0, 0);
         vertex(x1, y0, points[h][w + 1], 1, 0);
         vertex(x1, y1, points[h + 1][w + 1], 1, 1);
         vertex(x0, y1, points[h + 1][w], 0, 1);
-      } else if (TEXTURE) {
+      } else if (DISPLAY.TEXTURE) {
         vertex(x0, y0, points[h][w], x0n, y0n);
         vertex(x1, y0, points[h][w + 1], x1n, y0n);
         vertex(x1, y1, points[h + 1][w + 1], x1n, y1n);
         vertex(x0, y1, points[h + 1][w], x0n, y1n);
+      } else {
+        vertex(x0, y0, points[h][w]);
+        vertex(x1, y0, points[h][w + 1]);
+        vertex(x1, y1, points[h + 1][w + 1]);
+        vertex(x0, y1, points[h + 1][w]);
       }
       endShape(CLOSE);
       pop();
@@ -233,6 +239,35 @@ $(() => {
   });
 
   $('#my-color-box').click(() => {
-    COLORS = $('#my-color-box').is(":checked");
+    DISPLAY.LIGHTS = $('#my-color-box').is(":checked");
+
+    if(DISPLAY.LIGHTS) {
+      $('#my-texture-box').prop('checked', false);
+      $('#my-tile-box').prop('checked', false);
+      DISPLAY.TEXTURE = false;
+      DISPLAY.TILE = false;
+      $('#my-texture-box').prop('checked', DISPLAY.TEXTURE);
+      $('#my-tile-box').prop('checked', DISPLAY.TILE);
+      document.getElementById('my-tile-box').classList.add('file-input-disable');
+      document.getElementById('my-title-label').classList.add('file-input-disable');
+    }
+  });
+
+  $('#my-texture-box').click(() => {
+    DISPLAY.TEXTURE = $('#my-texture-box').is(":checked");
+
+    if (DISPLAY.TEXTURE) {
+      document.getElementById('my-tile-box').classList.remove('file-input-disable');
+      document.getElementById('my-title-label').classList.remove('file-input-disable');
+    } else {
+      document.getElementById('my-tile-box').classList.add('file-input-disable');
+      document.getElementById('my-title-label').classList.add('file-input-disable');
+      DISPLAY.TILE = false;
+      $('#my-tile-box').prop('checked', DISPLAY.TILE);
+    }
+  });
+
+  $('#my-tile-box').click(() => {
+    DISPLAY.TILE = $('#my-tile-box').is(":checked");
   });
 });
