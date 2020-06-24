@@ -1,5 +1,6 @@
 let jsonA;
 let jsonC;
+let mImg;
 
 let jsonALoaded = false;
 let jsonCLoaded = false;
@@ -9,8 +10,12 @@ const Z_FILTER = 50;
 
 const points = [];
 let gridStep;
+let maxDim;
 
 let easycam;
+let LIGHTS = true;
+let TILE = false;
+
 const CAM_TRANS = {
   x: 0,
   y: 0,
@@ -20,6 +25,7 @@ const CAM_TRANS = {
 function preload() {
   jsonA = loadJSON('assets/values-A.json');
   jsonC = loadJSON('assets/values-C.json');
+  mImg = loadImage('assets/tgh.jpg');
 }
 
 function preProcessJson(mj) {
@@ -94,6 +100,7 @@ function readNewJsonFiles() {
   }
 
   gridStep = Math.max(height / points.length, width / points[0].length);
+  maxDim = Math.max(gridStep * points.length, gridStep * points[0].length);
   CAM_TRANS.x = -0.5 * gridStep * points[0].length;
   CAM_TRANS.y = -0.5 * gridStep * points.length;
   CAM_TRANS.z = -500;
@@ -115,29 +122,54 @@ function draw() {
   background(0);
   strokeWeight(3);
   stroke(255);
-  fill(255);
+  fill(16);
 
   translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
 
-  pointLight(250, 0, 0,   -CAM_TRANS.x/2, 0, 50);
-  pointLight(0, 250, 0,   -CAM_TRANS.x, 0,   50);
-  pointLight(0, 0, 250,   0, 0,              50);
-  pointLight(250, 250, 0, CAM_TRANS.x, 0,    50);
-  pointLight(250, 0, 250, CAM_TRANS.x/2, 0,  50);
+  if (LIGHTS) {
+    fill(255);
+    pointLight(250, 0, 0,   -CAM_TRANS.x/2, 0, 50);
+    pointLight(0, 250, 0,   -CAM_TRANS.x, 0,   50);
+    pointLight(0, 0, 250,   0, 0,              50);
+    pointLight(250, 250, 0, CAM_TRANS.x, 0,    50);
+    pointLight(250, 0, 250, CAM_TRANS.x/2, 0,  50);
+  } else {
+    texture(mImg);
+    textureMode(NORMAL);
+  }
 
   for(let h = 0; h < points.length - 1; h++) {
     const y0 = gridStep * (h + 0);
     const y1 = gridStep * (h + 1);
 
+    const y0n = y0 / maxDim;
+    const y1n = y1 / maxDim;
+
     for(let w = 0; w < points[h].length - 1; w++) {
       const x0 = gridStep * (w + 0);
       const x1 = gridStep * (w + 1);
 
+      const x0n = x0 / maxDim;
+      const x1n = x1 / maxDim;
+
       beginShape();
-      vertex(x0, y0, points[h][w]);
-      vertex(x1, y0, points[h][w + 1]);
-      vertex(x1, y1, points[h + 1][w + 1]);
-      vertex(x0, y1, points[h + 1][w]);
+      if (LIGHTS) {
+        vertex(x0, y0, points[h][w]);
+        vertex(x1, y0, points[h][w + 1]);
+        vertex(x1, y1, points[h + 1][w + 1]);
+        vertex(x0, y1, points[h + 1][w]);
+      }
+      else if (TILE) {
+        vertex(x0, y0, points[h][w], 0, 0);
+        vertex(x1, y0, points[h][w + 1], 1, 0);
+        vertex(x1, y1, points[h + 1][w + 1], 1, 1);
+        vertex(x0, y1, points[h + 1][w], 0, 1);
+      } else {
+        vertex(x0, y0, points[h][w], x0n, y0n);
+        vertex(x1, y0, points[h][w + 1], x1n, y0n);
+        vertex(x1, y1, points[h + 1][w + 1], x1n, y1n);
+        vertex(x0, y1, points[h + 1][w], x0n, y1n);
+      }
       endShape(CLOSE);
     }
   }
