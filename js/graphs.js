@@ -33,7 +33,7 @@ const CAM_TRANS = {
 function preload() {
   jsonA = loadJSON('assets/values-A.json');
   jsonC = loadJSON('assets/values-C.json');
-  mImg = loadImage('assets/texture.jpg');
+  mImg = createImage(64, 64);
 }
 
 function preProcessJson(mj) {
@@ -245,7 +245,6 @@ $(() => {
     reader.onload = function (readerEvent) {
       const image = new Image();
       image.onload = function (imageEvent) {
-        const mCanvas = document.createElement('canvas');
         const MAX_DIM = 1024;
         let iWidth = image.width;
         let iHeight = image.height;
@@ -258,15 +257,14 @@ $(() => {
           iHeight *= MAX_DIM / iWidth;
           iWidth = MAX_DIM;
         }
-        mCanvas.width = Math.min(iWidth, iHeight);
-        mCanvas.height = mCanvas.width;
-        mCanvas.getContext('2d').drawImage(image, 0, 0, minDim, minDim,
-                                          0, 0, mCanvas.width, mCanvas.height);
+        const newDim = Math.min(iWidth, iHeight);
 
-        // TODO: put in pImage ... somehow ...
-        // mCanvas.toDataURL('image/jpeg')
-        //document.getElementsByTagName('html')[0].appendChild(mCanvas);
+        mImg.resize(newDim, newDim);
+        mImg.drawingContext.drawImage(image, 0, 0, minDim, minDim,
+                                      0, 0, newDim, newDim);
 
+        document.getElementById('my-texture-box').classList.remove('file-input-disable');
+        document.getElementById('my-texture-label').classList.remove('file-input-disable');
         if (event.target) event.target.value = '';
       }
       image.src = readerEvent.target.result;
@@ -285,7 +283,7 @@ $(() => {
       $('#my-texture-box').prop('checked', DISPLAY.TEXTURE);
       $('#my-tile-box').prop('checked', DISPLAY.TILE);
       document.getElementById('my-tile-box').classList.add('file-input-disable');
-      document.getElementById('my-title-label').classList.add('file-input-disable');
+      document.getElementById('my-tile-label').classList.add('file-input-disable');
     }
   });
 
@@ -294,10 +292,10 @@ $(() => {
 
     if (DISPLAY.TEXTURE) {
       document.getElementById('my-tile-box').classList.remove('file-input-disable');
-      document.getElementById('my-title-label').classList.remove('file-input-disable');
+      document.getElementById('my-tile-label').classList.remove('file-input-disable');
     } else {
       document.getElementById('my-tile-box').classList.add('file-input-disable');
-      document.getElementById('my-title-label').classList.add('file-input-disable');
+      document.getElementById('my-tile-label').classList.add('file-input-disable');
       DISPLAY.TILE = false;
       $('#my-tile-box').prop('checked', DISPLAY.TILE);
     }
