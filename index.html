@@ -7,14 +7,21 @@
   </head>
   <body>
     <div class="menu">
-      <input name="afile" type="file" id="my-a-file" class="file-input" accept="*.json">
-      <input name="cfile" type="file" id="my-c-file" class="file-input" accept="*.json">
+      <label for="afile">JSON A</label>
+      <input name="afile" type="file" id="my-a-file" class="file-input file-input-json" accept="*.json">
 
-      <lable for="color">CORES</lable>
+      <label for="cfile">JSON C</label>
+      <input name="cfile" type="file" id="my-c-file" class="file-input file-input-json" accept="*.json">
+
+      <label for="tfile">TEXTURA</label>
+      <input name="tfile" type="file" id="my-t-file" class="file-input file-input-image" accept="image/*">
+      <br>
+
+      <label for="color">CORES</label>
       <input name="color" type="checkbox" id="my-color-box">
-      <lable for="texture">TEXTURA</lable>
+      <label for="texture">TEXTURA</label>
       <input name="texture" type="checkbox" id="my-texture-box">
-      <lable for="tile" id="my-title-label" class="file-input-disable">REPETIR TEXTURA</lable>
+      <label for="tile" id="my-title-label" class="file-input-disable">REPETIR TEXTURA</label>
       <input name="tile" type="checkbox" id="my-tile-box" class="file-input-disable">
     </div>
   </body>

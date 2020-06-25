@@ -210,7 +210,7 @@ function windowResized() {
 }
 
 $(() => {
-  $(".file-input").change((event) => {
+  $(".file-input-json").change((event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
 
@@ -219,7 +219,7 @@ $(() => {
         jsonA = JSON.parse(readerEvent.target.result);
         jsonALoaded = true;
         event.target.classList.add('file-input-disable');
-      } else {
+      } else if(event.target.id === 'my-c-file') {
         jsonC = JSON.parse(readerEvent.target.result);
         jsonCLoaded = true;
         event.target.classList.add('file-input-disable');
@@ -236,6 +236,42 @@ $(() => {
       if (event.target) event.target.value = '';
     }
     reader.readAsText(file);
+  });
+
+  $(".file-input-image").change((event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (readerEvent) {
+      const image = new Image();
+      image.onload = function (imageEvent) {
+        const mCanvas = document.createElement('canvas');
+        const MAX_DIM = 1024;
+        let iWidth = image.width;
+        let iHeight = image.height;
+        let minDim = Math.min(image.width, image.height);
+
+        if ((iWidth > iHeight) && (iHeight > MAX_DIM)) {
+          iWidth *= MAX_DIM / iHeight;
+          iHeight = MAX_DIM;
+        } else if (iWidth > MAX_DIM) {
+          iHeight *= MAX_DIM / iWidth;
+          iWidth = MAX_DIM;
+        }
+        mCanvas.width = Math.min(iWidth, iHeight);
+        mCanvas.height = mCanvas.width;
+        mCanvas.getContext('2d').drawImage(image, 0, 0, minDim, minDim,
+                                          0, 0, mCanvas.width, mCanvas.height);
+
+        // TODO: put in pImage ... somehow ...
+        // mCanvas.toDataURL('image/jpeg')
+        //document.getElementsByTagName('html')[0].appendChild(mCanvas);
+
+        if (event.target) event.target.value = '';
+      }
+      image.src = readerEvent.target.result;
+    }
+    reader.readAsDataURL(file);
   });
 
   $('#my-color-box').click(() => {
