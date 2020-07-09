@@ -28,3 +28,11 @@ canvas {
 input[type=checkbox] {
   margin: 8px 32px 0 0;
 }
+
+#canvas2d {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  pointer-events: none;
+}

@@ -26,7 +26,7 @@ const DISPLAY = {
 let COLORS = false;
 let TEXTURE = false;
 let TILE = false;
-let SHOW_2D = false;
+let SHOW2D = false;
 
 const CAM_TRANS = {
   x: 0,
@@ -159,7 +159,8 @@ function create2d() {
 
 const sketch2D = function(sketch) {
   sketch.setup = function() {
-    sketch.createCanvas(sketch.windowWidth, sketch.windowHeight);
+    const mCanvas = sketch.createCanvas(sketch.windowWidth, sketch.windowHeight);
+    mCanvas.id('canvas2d');
     sketch.setAttributes('antialias', true);
     sketch.smooth();
     sketch.pixelDensity(2);
@@ -168,11 +169,15 @@ const sketch2D = function(sketch) {
   }
 
   sketch.draw = function() {
+    sketch.clear();
     sketch.background(0, 0);
     sketch.strokeWeight(3);
     sketch.stroke(255);
     sketch.fill(16);
-    sketch.image(m2dGraph, 0, 0);
+
+    if(SHOW2D) {
+      sketch.image(m2dGraph, 0, menuHeight);
+    }
   }
 
   sketch.windowResized = function() {
@@ -190,7 +195,8 @@ const sketch3D = function(sketch) {
   }
 
   sketch.setup = function() {
-    sketch.createCanvas(sketch.windowWidth, sketch.windowHeight, sketch.WEBGL);
+    const mCanvas = sketch.createCanvas(sketch.windowWidth, sketch.windowHeight, sketch.WEBGL);
+    mCanvas.id('canvas3d');
     sketch.setAttributes('antialias', true);
     sketch.smooth();
     sketch.pixelDensity(2);
@@ -374,6 +380,6 @@ $(() => {
   });
 
   $('#my-2d-box').click(() => {
-    SHOW_2D = $('#my-2d-box').is(":checked");
+    SHOW2D = $('#my-2d-box').is(":checked");
   });
 });
