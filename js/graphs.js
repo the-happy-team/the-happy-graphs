@@ -27,6 +27,7 @@ let COLORS = false;
 let TEXTURE = false;
 let TILE = false;
 let SHOW2D = false;
+let LINEWEIGHT2D = 3;
 
 const CAM_TRANS = {
   x: 0,
@@ -127,6 +128,8 @@ function readNewJsonFiles() {
       points[2 * ei + 1].push(jsonC.values[`${emotion}`][p]);
     }
   }
+
+  createEmoMenu();
   create2d();
 
   gridStep = Math.max(p53D.height / points.length, p53D.width / points[0].length);
@@ -134,6 +137,16 @@ function readNewJsonFiles() {
   CAM_TRANS.x = -0.5 * gridStep * points[0].length;
   CAM_TRANS.y = -0.5 * gridStep * points.length;
   CAM_TRANS.z = -500;
+}
+
+function createEmoMenu() {
+  const mdiv = $('#my-emo-box-container');
+  mdiv.empty();
+
+  for(let e of jsonA.header) {
+    mdiv.append($(`<label for="${e}-2d">${e}</label>`));
+    mdiv.append($(`<input name="${e}-2d" type="checkbox">`).click(create2d).attr('checked', true).addClass('file-input-disable').addClass('emo-box'));
+  }
 }
 
 function create2d() {
@@ -144,8 +157,9 @@ function create2d() {
 
   for(let ei = 0; ei < points.length / 2; ei++) {
     const emotion = jsonA.header[ei];
+    const showEmotion = $(`input[name="${emotion}-2d"]`).is(':checked');
 
-    for(let p = 0; p < points[2 * ei].length - 1; p++) {
+    for(let p = 0; (showEmotion && p < points[2 * ei].length - 1); p++) {
       const x0 = p53D.map(p, 0, points[2 * ei].length - 1, 0, m2dGraph.width);
       const y0 = p53D.map(points[2 * ei][p], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
 
@@ -171,7 +185,7 @@ const sketch2D = function(sketch) {
   sketch.draw = function() {
     sketch.clear();
     sketch.background(0, 0);
-    sketch.strokeWeight(3);
+    sketch.strokeWeight(LINEWEIGHT2D);
     sketch.stroke(255);
     sketch.fill(16);
 
@@ -381,5 +395,10 @@ $(() => {
 
   $('#my-2d-box').click(() => {
     SHOW2D = $('#my-2d-box').is(":checked");
+    if(SHOW2D){
+      $('.emo-box').removeClass('file-input-disable');
+    } else {
+      $('.emo-box').addClass('file-input-disable');
+    }
   });
 });
