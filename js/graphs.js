@@ -30,6 +30,12 @@ const CAM_TRANS = {
   z: 0
 };
 
+const CAM_INIT_STATE = {
+  distance : 2000,
+  center   : [0, 0, 0],
+  rotation : [Math.sqrt(2) / 2, -Math.sqrt(3) / 2, 0, 0]
+};
+
 function preload() {
   jsonA = loadJSON('assets/values-A.json');
   jsonC = loadJSON('assets/values-C.json');
@@ -38,8 +44,9 @@ function preload() {
 
 function preProcessJson(mj) {
   mj.header = mj.header.filter((e) => e != 'time');
-  mj.values['neutral'].forEach((v, i, arr) => arr[i] = (1.0 - v));
-  mj.values['neutral'].reverse();
+  mj.header.push(mj.header.splice(mj.header.indexOf('neutral'), 1)[0]);
+  //mj.values['neutral'].forEach((v, i, arr) => arr[i] = (1.0 - v));
+  //mj.values['neutral'].reverse();
 
   for(let e of jsonA.header) {
     jsonA.values[`${e}_f`] = [];
@@ -137,7 +144,7 @@ function setup() {
   pixelDensity(2);
   randomSeed(1010);
 
-  easycam = new Dw.EasyCam(this._renderer);
+  easycam = new Dw.EasyCam(this._renderer, CAM_INIT_STATE);
 
   readNewJsonFiles();
 }
