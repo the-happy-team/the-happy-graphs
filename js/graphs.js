@@ -34,6 +34,7 @@ const CAM_TRANS = {
   y: 0,
   z: 0
 };
+const CAM_TRANS_DELTA = 16;
 
 const CAM_INIT_STATE = {
   distance : 2000,
@@ -285,12 +286,33 @@ const sketch3D = function(sketch) {
       }
     }
     sketch.pop();
+    checkKeys();
   }
 
   sketch.windowResized = function() {
     sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
     easycam.setViewport([0,0,sketch.windowWidth, sketch.windowHeight]);
     menuHeight = $('#my-menu').outerHeight();
+  }
+
+  function checkKeys() {
+    if(sketch.keyIsDown(sketch.SHIFT)) {
+      if(sketch.keyIsDown(sketch.UP_ARROW)) {
+        CAM_TRANS.y -= CAM_TRANS_DELTA;
+      } else if(sketch.keyIsDown(sketch.DOWN_ARROW)) {
+        CAM_TRANS.y += CAM_TRANS_DELTA;
+      }
+    } else {
+      if(sketch.keyIsDown(sketch.UP_ARROW)) {
+        CAM_TRANS.z += CAM_TRANS_DELTA;
+      } else if(sketch.keyIsDown(sketch.DOWN_ARROW)) {
+        CAM_TRANS.z -= CAM_TRANS_DELTA;
+      } else if(sketch.keyIsDown(sketch.LEFT_ARROW)) {
+        CAM_TRANS.x += CAM_TRANS_DELTA;
+      } else if(sketch.keyIsDown(sketch.RIGHT_ARROW)) {
+        CAM_TRANS.x -= CAM_TRANS_DELTA;
+      }
+    }
   }
 };
 
