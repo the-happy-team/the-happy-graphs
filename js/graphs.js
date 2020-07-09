@@ -40,12 +40,6 @@ const CAM_INIT_STATE = {
   rotation : [Math.sqrt(2) / 2, -Math.sqrt(3) / 2, 0, 0]
 };
 
-function preload() {
-  jsonA = loadJSON('assets/values-A.json');
-  jsonC = loadJSON('assets/values-C.json');
-  mImg = createImage(64, 64);
-}
-
 function preProcessJson(mj) {
   mj.header = mj.header.filter((e) => e != 'time');
   mj.header.push(mj.header.splice(mj.header.indexOf('neutral'), 1)[0]);
@@ -96,12 +90,12 @@ function smoothEmotionValues(mj, emo) {
   for(let i = 0; i < mVals.length; i++) {
     const iR = mVals.length - 1 - i;
 
-    const thisZ = map(mVals[i], minVal, maxVal, 0, Z_MAX);
-    let z = Math.max(thisZ, random(0.3, 0.5) * lastZ);
+    const thisZ = p53D.map(mVals[i], minVal, maxVal, 0, Z_MAX);
+    let z = Math.max(thisZ, p53D.random(0.3, 0.5) * lastZ);
     lastZ = z;
 
-    const thisZR = map(mVals[iR], minVal, maxVal, 0, Z_MAX);
-    let zR = Math.max(thisZR, random(0.3, 0.5) * lastZR);
+    const thisZR = p53D.map(mVals[iR], minVal, maxVal, 0, Z_MAX);
+    let zR = Math.max(thisZR, p53D.random(0.3, 0.5) * lastZR);
     lastZR = zR;
 
     points.push(z);
@@ -133,9 +127,8 @@ function readNewJsonFiles() {
       points[2 * ei + 1].push(jsonC.values[`${emotion}`][p]);
     }
   }
-  create2d();
 
-  gridStep = Math.max(height / points.length, width / points[0].length);
+  gridStep = Math.max(p53D.height / points.length, p53D.width / points[0].length);
   maxDim = Math.max(gridStep * points.length, gridStep * points[0].length);
   CAM_TRANS.x = -0.5 * gridStep * points[0].length;
   CAM_TRANS.y = -0.5 * gridStep * points.length;
@@ -163,91 +156,100 @@ function create2d() {
   }
 }
 
-function setup() { 
-  createCanvas(windowWidth, windowHeight, WEBGL);
-  setAttributes('antialias', true);
-  smooth();
-  pixelDensity(2);
-  randomSeed(1010);
-  frameRate(10);
-
-  easycam = new Dw.EasyCam(this._renderer, CAM_INIT_STATE);
-  menuHeight = $('#my-menu').outerHeight();
-
-  readNewJsonFiles();
-}
-
-function draw() {
-  background(0);
-  strokeWeight(3);
-  stroke(255);
-  fill(16);
-
-  push();
-  translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
-
-  if (DISPLAY.LIGHTS) {
-    fill(255);
-    pointLight(250, 0, 0,   -CAM_TRANS.x/2, 0, 50);
-    pointLight(0, 250, 0,   -CAM_TRANS.x, 0,   50);
-    pointLight(0, 0, 250,   0, 0,              50);
-    pointLight(250, 250, 0, CAM_TRANS.x, 0,    50);
-    pointLight(250, 0, 250, CAM_TRANS.x/2, 0,  50);
-  } else if (DISPLAY.TEXTURE || DISPLAY.TILE) {
-    texture(mImg);
-    textureMode(NORMAL);
-  } else {
-    fill(64);
-    stroke(255);
-    ambientLight(200,200,200);
+const sketch3D = function(sketch) {
+  sketch.preload = function() {
+    jsonA = sketch.loadJSON('assets/values-A.json');
+    jsonC = sketch.loadJSON('assets/values-C.json');
+    mImg = sketch.createImage(64, 64);
   }
 
-  for(let h = 0; h < points.length - 1; h++) {
-    const y0 = gridStep * (h + 0);
-    const y1 = gridStep * (h + 1);
+  sketch.setup = function() {
+    sketch.createCanvas(sketch.windowWidth, sketch.windowHeight, sketch.WEBGL);
+    sketch.setAttributes('antialias', true);
+    sketch.smooth();
+    sketch.pixelDensity(2);
+    sketch.randomSeed(1010);
+    sketch.frameRate(10);
 
-    const y0n = y0 / maxDim;
-    const y1n = y1 / maxDim;
+    easycam = new Dw.EasyCam(this._renderer, CAM_INIT_STATE);
+    menuHeight = $('#my-menu').outerHeight();
 
-    for(let w = 0; w < points[h].length - 1; w++) {
-      const x0 = gridStep * (w + 0);
-      const x1 = gridStep * (w + 1);
+    readNewJsonFiles();
+  }
 
-      const x0n = x0 / maxDim;
-      const x1n = x1 / maxDim;
+  sketch.draw = function() {
+    sketch.background(0);
+    sketch.strokeWeight(3);
+    sketch.stroke(255);
+    sketch.fill(16);
 
-      push();
-      beginShape();
-      if (DISPLAY.TILE) {
-        vertex(x0, y0, points[h][w], 0, 0);
-        vertex(x1, y0, points[h][w + 1], 1, 0);
-        vertex(x1, y1, points[h + 1][w + 1], 1, 1);
-        vertex(x0, y1, points[h + 1][w], 0, 1);
-      } else if (DISPLAY.TEXTURE) {
-        vertex(x0, y0, points[h][w], x0n, y0n);
-        vertex(x1, y0, points[h][w + 1], x1n, y0n);
-        vertex(x1, y1, points[h + 1][w + 1], x1n, y1n);
-        vertex(x0, y1, points[h + 1][w], x0n, y1n);
-      } else {
-        vertex(x0, y0, points[h][w]);
-        vertex(x1, y0, points[h][w + 1]);
-        vertex(x1, y1, points[h + 1][w + 1]);
-        vertex(x0, y1, points[h + 1][w]);
-      }
-      endShape(CLOSE);
-      pop();
+    sketch.push();
+    sketch.translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
+
+    if (DISPLAY.LIGHTS) {
+      sketch.fill(255);
+      sketch.pointLight(250, 0, 0,   -CAM_TRANS.x/2, 0, 50);
+      sketch.pointLight(0, 250, 0,   -CAM_TRANS.x, 0,   50);
+      sketch.pointLight(0, 0, 250,   0, 0,              50);
+      sketch.pointLight(250, 250, 0, CAM_TRANS.x, 0,    50);
+      sketch.pointLight(250, 0, 250, CAM_TRANS.x/2, 0,  50);
+    } else if (DISPLAY.TEXTURE || DISPLAY.TILE) {
+      sketch.texture(mImg);
+      sketch.textureMode(sketch.NORMAL);
+    } else {
+      sketch.fill(64);
+      sketch.stroke(255);
+      sketch.ambientLight(200,200,200);
     }
+
+    for(let h = 0; h < points.length - 1; h++) {
+      const y0 = gridStep * (h + 0);
+      const y1 = gridStep * (h + 1);
+
+      const y0n = y0 / maxDim;
+      const y1n = y1 / maxDim;
+
+      for(let w = 0; w < points[h].length - 1; w++) {
+        const x0 = gridStep * (w + 0);
+        const x1 = gridStep * (w + 1);
+
+        const x0n = x0 / maxDim;
+        const x1n = x1 / maxDim;
+
+        sketch.push();
+        sketch.beginShape();
+        if (DISPLAY.TILE) {
+          sketch.vertex(x0, y0, points[h][w], 0, 0);
+          sketch.vertex(x1, y0, points[h][w + 1], 1, 0);
+          sketch.vertex(x1, y1, points[h + 1][w + 1], 1, 1);
+          sketch.vertex(x0, y1, points[h + 1][w], 0, 1);
+        } else if (DISPLAY.TEXTURE) {
+          sketch.vertex(x0, y0, points[h][w], x0n, y0n);
+          sketch.vertex(x1, y0, points[h][w + 1], x1n, y0n);
+          sketch.vertex(x1, y1, points[h + 1][w + 1], x1n, y1n);
+          sketch.vertex(x0, y1, points[h + 1][w], x0n, y1n);
+        } else {
+          sketch.vertex(x0, y0, points[h][w]);
+          sketch.vertex(x1, y0, points[h][w + 1]);
+          sketch.vertex(x1, y1, points[h + 1][w + 1]);
+          sketch.vertex(x0, y1, points[h + 1][w]);
+        }
+        sketch.endShape(sketch.CLOSE);
+        sketch.pop();
+      }
+    }
+    sketch.pop();
   }
-  pop();
 
-}
+  sketch.windowResized = function() {
+    sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
+    easycam.setViewport([0,0,sketch.windowWidth, sketch.windowHeight]);
+    menuHeight = $('#my-menu').outerHeight();
+    create2d();
+  }
+};
 
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-  easycam.setViewport([0,0,windowWidth, windowHeight]);
-  menuHeight = $('#my-menu').outerHeight();
-  create2d();
-}
+const p53D = new p5(sketch3D);
 
 $(() => {
   $(".file-input-json").change((event) => {
