@@ -1,6 +1,7 @@
 let jsonA;
 let jsonC;
 let mImg;
+let m2dGraph;
 
 let jsonALoaded = false;
 let jsonCLoaded = false;
@@ -13,6 +14,8 @@ let gridStep;
 let maxDim;
 
 let easycam;
+let menuHeight;
+const m2dYpadding = 5;
 
 const DISPLAY = {
   LIGHTS: false,
@@ -23,6 +26,7 @@ const DISPLAY = {
 let COLORS = false;
 let TEXTURE = false;
 let TILE = false;
+let SHOW_2D = false;
 
 const CAM_TRANS = {
   x: 0,
@@ -124,11 +128,12 @@ function readNewJsonFiles() {
 
   for(let p = 0; p < jsonA.values['happy'].length && p < jsonC.values['happy'].length; p++) {
     for(let ei = 0; ei < jsonA.header.length; ei++) {
-      const e = jsonA.header[ei];
-      points[2 * ei + 0].push(jsonA.values[`${e}`][p]);
-      points[2 * ei + 1].push(jsonC.values[`${e}`][p]);
+      const emotion = jsonA.header[ei];
+      points[2 * ei + 0].push(jsonA.values[`${emotion}`][p]);
+      points[2 * ei + 1].push(jsonC.values[`${emotion}`][p]);
     }
   }
+  create2d();
 
   gridStep = Math.max(height / points.length, width / points[0].length);
   maxDim = Math.max(gridStep * points.length, gridStep * points[0].length);
@@ -137,14 +142,37 @@ function readNewJsonFiles() {
   CAM_TRANS.z = -500;
 }
 
+function create2d() {
+  m2dGraph = createGraphics(width, (height - menuHeight));
+  m2dGraph.background(0, 0);
+  m2dGraph.stroke(255);
+  m2dGraph.noFill();
+
+  for(let ei = 0; ei < points.length / 2; ei++) {
+    const emotion = jsonA.header[ei];
+
+    for(let p = 0; p < points[2 * ei].length - 1; p++) {
+      const x0 = map(p, 0, points[2 * ei].length - 1, 0, m2dGraph.width);
+      const y0 = map(points[2 * ei][p], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+
+      const x1 = map(p + 1, 0, points[2 * ei].length - 1, 0, m2dGraph.width);
+      const y1 = map(points[2 * ei][p + 1], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+
+      m2dGraph.line(x0, y0, x1, y1);
+    }
+  }
+}
+
 function setup() { 
   createCanvas(windowWidth, windowHeight, WEBGL);
   setAttributes('antialias', true);
   smooth();
   pixelDensity(2);
   randomSeed(1010);
+  frameRate(10);
 
   easycam = new Dw.EasyCam(this._renderer, CAM_INIT_STATE);
+  menuHeight = $('#my-menu').outerHeight();
 
   readNewJsonFiles();
 }
@@ -155,6 +183,7 @@ function draw() {
   stroke(255);
   fill(16);
 
+  push();
   translate(CAM_TRANS.x, CAM_TRANS.y, CAM_TRANS.z);
 
   if (DISPLAY.LIGHTS) {
@@ -209,11 +238,15 @@ function draw() {
       pop();
     }
   }
+  pop();
+
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   easycam.setViewport([0,0,windowWidth, windowHeight]);
+  menuHeight = $('#my-menu').outerHeight();
+  create2d();
 }
 
 $(() => {
@@ -310,5 +343,9 @@ $(() => {
 
   $('#my-tile-box').click(() => {
     DISPLAY.TILE = $('#my-tile-box').is(":checked");
+  });
+
+  $('#my-2d-box').click(() => {
+    SHOW_2D = $('#my-2d-box').is(":checked");
   });
 });
