@@ -127,6 +127,7 @@ function readNewJsonFiles() {
       points[2 * ei + 1].push(jsonC.values[`${emotion}`][p]);
     }
   }
+  create2d();
 
   gridStep = Math.max(p53D.height / points.length, p53D.width / points[0].length);
   maxDim = Math.max(gridStep * points.length, gridStep * points[0].length);
@@ -136,7 +137,7 @@ function readNewJsonFiles() {
 }
 
 function create2d() {
-  m2dGraph = createGraphics(width, (height - menuHeight));
+  m2dGraph = p53D.createGraphics(p53D.width, (p53D.height - menuHeight));
   m2dGraph.background(0, 0);
   m2dGraph.stroke(255);
   m2dGraph.noFill();
@@ -145,14 +146,39 @@ function create2d() {
     const emotion = jsonA.header[ei];
 
     for(let p = 0; p < points[2 * ei].length - 1; p++) {
-      const x0 = map(p, 0, points[2 * ei].length - 1, 0, m2dGraph.width);
-      const y0 = map(points[2 * ei][p], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+      const x0 = p53D.map(p, 0, points[2 * ei].length - 1, 0, m2dGraph.width);
+      const y0 = p53D.map(points[2 * ei][p], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
 
-      const x1 = map(p + 1, 0, points[2 * ei].length - 1, 0, m2dGraph.width);
-      const y1 = map(points[2 * ei][p + 1], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+      const x1 = p53D.map(p + 1, 0, points[2 * ei].length - 1, 0, m2dGraph.width);
+      const y1 = p53D.map(points[2 * ei][p + 1], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
 
       m2dGraph.line(x0, y0, x1, y1);
     }
+  }
+}
+
+const sketch2D = function(sketch) {
+  sketch.setup = function() {
+    sketch.createCanvas(sketch.windowWidth, sketch.windowHeight);
+    sketch.setAttributes('antialias', true);
+    sketch.smooth();
+    sketch.pixelDensity(2);
+    sketch.randomSeed(1010);
+    sketch.frameRate(24);
+  }
+
+  sketch.draw = function() {
+    sketch.background(0, 0);
+    sketch.strokeWeight(3);
+    sketch.stroke(255);
+    sketch.fill(16);
+    sketch.image(m2dGraph, 0, 0);
+  }
+
+  sketch.windowResized = function() {
+    sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
+    menuHeight = $('#my-menu').outerHeight();
+    create2d();
   }
 }
 
@@ -169,7 +195,7 @@ const sketch3D = function(sketch) {
     sketch.smooth();
     sketch.pixelDensity(2);
     sketch.randomSeed(1010);
-    sketch.frameRate(10);
+    sketch.frameRate(24);
 
     easycam = new Dw.EasyCam(this._renderer, CAM_INIT_STATE);
     menuHeight = $('#my-menu').outerHeight();
@@ -245,11 +271,11 @@ const sketch3D = function(sketch) {
     sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
     easycam.setViewport([0,0,sketch.windowWidth, sketch.windowHeight]);
     menuHeight = $('#my-menu').outerHeight();
-    create2d();
   }
 };
 
 const p53D = new p5(sketch3D);
+const p52D = new p5(sketch2D);
 
 $(() => {
   $(".file-input-json").change((event) => {
