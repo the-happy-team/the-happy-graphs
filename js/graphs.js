@@ -27,7 +27,7 @@ let COLORS = false;
 let TEXTURE = false;
 let TILE = false;
 let SHOW2D = false;
-let LINEWEIGHT2D = 3;
+let LINEWEIGHT2D = 1;
 
 const CAM_TRANS = {
   x: 0,
@@ -144,7 +144,7 @@ function createEmoMenu() {
   mdiv.empty();
 
   for(let e of jsonA.header) {
-    mdiv.append($(`<label for="${e}-2d">${e}</label>`));
+    mdiv.append($(`<label for="${e}-2d">${e}</label>`).addClass('file-input-disable').addClass('emo-box-label'));
     mdiv.append($(`<input name="${e}-2d" type="checkbox">`).click(create2d).attr('checked', true).addClass('file-input-disable').addClass('emo-box'));
   }
 }
@@ -153,6 +153,7 @@ function create2d() {
   m2dGraph = p53D.createGraphics(p53D.width, (p53D.height - menuHeight));
   m2dGraph.background(0, 0);
   m2dGraph.stroke(255);
+  m2dGraph.strokeWeight(LINEWEIGHT2D);
   m2dGraph.noFill();
 
   for(let ei = 0; ei < points.length / 2; ei++) {
@@ -185,7 +186,6 @@ const sketch2D = function(sketch) {
   sketch.draw = function() {
     sketch.clear();
     sketch.background(0, 0);
-    sketch.strokeWeight(LINEWEIGHT2D);
     sketch.stroke(255);
     sketch.fill(16);
 
@@ -397,8 +397,20 @@ $(() => {
     SHOW2D = $('#my-2d-box').is(":checked");
     if(SHOW2D){
       $('.emo-box').removeClass('file-input-disable');
+      $('.emo-box-label').removeClass('file-input-disable');
+      $('#my-line-thickness-label').removeClass('file-input-disable');
+      $('#my-line-thickness').removeClass('file-input-disable');
     } else {
       $('.emo-box').addClass('file-input-disable');
+      $('.emo-box-label').addClass('file-input-disable');
+      $('#my-line-thickness-label').addClass('file-input-disable');
+      $('#my-line-thickness').addClass('file-input-disable');
     }
+  });
+
+  $('#my-line-thickness').change(() => {
+    LINEWEIGHT2D = $('#my-line-thickness').val();
+    create2d();
+    console.log('oaoa');
   });
 });
