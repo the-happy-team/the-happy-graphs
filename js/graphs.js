@@ -15,7 +15,7 @@ let maxDim;
 
 let easycam;
 let menuHeight;
-let m2dYpadding = 8;
+let m2dYpadding = 16;
 let lineWeight2d = 1;
 
 const DISPLAY = {
