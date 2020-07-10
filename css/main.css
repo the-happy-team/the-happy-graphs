@@ -21,6 +21,10 @@ html, body {
   pointer-events: none;
 }
 
+.label-space-left {
+  margin-left: 16px;
+}
+
 canvas {
   z-index: 0;
 }

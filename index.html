@@ -26,7 +26,7 @@
       <label for="tile" id="my-tile-label" class="file-input-disable">REPETIR TEXTURA</label>
       <input name="tile" type="checkbox" id="my-tile-box" class="file-input-disable">
 
-      <label for="twod" id="my-2d-label">ARTISTA 2D</label>
+      <label for="twod" id="my-2d-label">Artista 2D</label>
       <input name="twod" type="checkbox" id="my-2d-box">
 
       <label for="line-thickness" id="my-line-thickness-label" class="file-input-disable">Espessura</label>
@@ -34,10 +34,19 @@
              id="my-line-thickness" class="file-input-disable"
              min="1" max="5" value="1">
 
-      <label for="vertical-padding-2d" id="my-vertical-padding-2d-label" class="file-input-disable">Borda</label>
+      <label for="vertical-padding-2d"
+             id="my-vertical-padding-2d-label" class="label-space-left file-input-disable">Borda</label>
       <input name="vertical-padding-2d" type="number"
              id="my-vertical-padding-2d" class="file-input-disable"
              min="1" max="70" value="16">
+
+      <label for="show-artist-3d" class="label-space-left">Modo 3D</label>
+      <select name="show-artist-3d" id="my-show-artist-3d">
+        <option value="AC">A & C</option>
+        <option value="C">C</option>
+        <option value="CC">C & C</option>
+        <option value="CcCc">CcCc</option>
+      </select>
 
       <div id="my-emo-3d-box-container" class="emo-3d-box-container">
         <label for="spacer">.</label>

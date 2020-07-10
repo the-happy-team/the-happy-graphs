@@ -15,6 +15,8 @@ let maxDim;
 
 let easycam;
 let menuHeight;
+
+let displayMode3D = 'AC';
 let m2dYpadding = 16;
 let lineWeight2d = 1;
 
@@ -145,9 +147,12 @@ function createEmoMenu(dim = '2d', fun = create2d) {
 function create3dPoints() {
   points.length = 0;
   points.push([]);
+
   for(let e of jsonA.header) {
     points.push([]);
-    points.push([]);
+    if(displayMode3D != 'C') {
+      points.push([]);
+    }
   }
   points.push([]);
 
@@ -158,14 +163,39 @@ function create3dPoints() {
       const showEmotion = $(`input[name="${emotion}-3d"]`).is(':checked');
 
       if(showEmotion) {
-        points[2 * ei + 0 + 1].push(jsonA.values[`${emotion}`][p]);
-        points[2 * ei + 1 + 1].push(jsonC.values[`${emotion}`][p]);
+        if(displayMode3D == 'AC') {
+          points[2 * ei + 0 + 1].push(jsonA.values[`${emotion}`][p]);
+          points[2 * ei + 1 + 1].push(jsonC.values[`${emotion}`][p]);
+        } else if(displayMode3D == 'C') {
+          points[ei + 0 + 1].push(jsonC.values[`${emotion}`][p]);
+        } else if(displayMode3D == 'CC') {
+          points[ei + 0 + 1].push(jsonC.values[`${emotion}`][p]);
+          points[ei + jsonA.header.length + 1].push(jsonC.values[`${emotion}`][p]);
+        } else if(displayMode3D == 'CcCc') {
+          points[2 * ei + 0 + 1].push(jsonC.values[`${emotion}`][p]);
+          points[2 * ei + 1 + 1].push(jsonC.values[`${emotion}`][p]);
+        }
       } else {
-        points[2 * ei + 0 + 1].push(0);
-        points[2 * ei + 1 + 1].push(0);
+        if(displayMode3D == 'AC') {
+          points[2 * ei + 0 + 1].push(0);
+          points[2 * ei + 1 + 1].push(0);
+        } else if(displayMode3D == 'C') {
+          points[ei + 0 + 1].push(0);
+        } else if(displayMode3D == 'CC') {
+          points[ei + 0 + 1].push(0);
+          points[ei + jsonA.header.length + 1].push(0);
+        } else if(displayMode3D == 'CcCc') {
+          points[2 * ei + 0 + 1].push(0);
+          points[2 * ei + 1 + 1].push(0);
+        }
       }
     }
-    points[2 * jsonA.header.length + 1].push(0);
+
+    if(displayMode3D == 'C') {
+      points[jsonA.header.length + 1].push(0);
+    } else {
+      points[2 * jsonA.header.length + 1].push(0);
+    }
   }
 }
 
@@ -480,5 +510,10 @@ $(() => {
   $('#my-vertical-padding-2d').change(() => {
     m2dYpadding = parseInt($('#my-vertical-padding-2d').val());
     create2d();
+  });
+
+  $('#my-show-artist-3d').change(() => {
+    displayMode3D = $('#my-show-artist-3d').val();
+    create3dPoints();
   });
 });
