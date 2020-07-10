@@ -15,7 +15,8 @@ let maxDim;
 
 let easycam;
 let menuHeight;
-const m2dYpadding = 5;
+let m2dYpadding = 8;
+let lineWeight2d = 1;
 
 const DISPLAY = {
   LIGHTS: false,
@@ -27,7 +28,6 @@ let COLORS = false;
 let TEXTURE = false;
 let TILE = false;
 let SHOW2D = false;
-let LINEWEIGHT2D = 1;
 
 const CAM_TRANS = {
   x: 0,
@@ -124,7 +124,6 @@ function readNewJsonFiles() {
   create3dPoints();
   create2d();
 
-
   gridStep = Math.max(p53D.height / points.length, p53D.width / points[0].length);
   maxDim = Math.max(gridStep * points.length, gridStep * points[0].length);
   CAM_TRANS.x = -0.5 * gridStep * points[0].length;
@@ -171,10 +170,10 @@ function create3dPoints() {
 }
 
 function create2d() {
-  m2dGraph = p53D.createGraphics(p53D.width, (p53D.height - menuHeight));
+  m2dGraph = p53D.createGraphics(p53D.width, p53D.height);
   m2dGraph.background(0, 0);
   m2dGraph.stroke(255);
-  m2dGraph.strokeWeight(LINEWEIGHT2D);
+  m2dGraph.strokeWeight(lineWeight2d);
   m2dGraph.noFill();
 
   for(let ei = 0; ei < jsonA.header.length; ei++) {
@@ -196,7 +195,19 @@ function create2d() {
 
 const sketch2D = function(sketch) {
   sketch.setup = function() {
-    const mCanvas = sketch.createCanvas(sketch.windowWidth, sketch.windowHeight);
+    menuHeight = $('#my-menu').outerHeight();
+    let mWidth = sketch.windowWidth;
+    let mHeight = sketch.windowHeight - menuHeight;
+    let nHeight = Math.round(mWidth * 1080.0 / 1920.0);
+
+    if (nHeight < mHeight) {
+      mHeight = nHeight;
+    } else {
+      mWidth = Math.round(mHeight * 1920.0 / 1080.0);
+    }
+
+    const mCanvas = sketch.createCanvas(mWidth, mHeight);
+    mCanvas.parent('my-canvas-container');
     mCanvas.id('canvas2d');
     sketch.setAttributes('antialias', true);
     sketch.smooth();
@@ -212,14 +223,8 @@ const sketch2D = function(sketch) {
     sketch.fill(16);
 
     if(SHOW2D) {
-      sketch.image(m2dGraph, 0, menuHeight);
+      sketch.image(m2dGraph, 0, 0);
     }
-  }
-
-  sketch.windowResized = function() {
-    sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
-    menuHeight = $('#my-menu').outerHeight();
-    create2d();
   }
 }
 
@@ -231,7 +236,19 @@ const sketch3D = function(sketch) {
   }
 
   sketch.setup = function() {
-    const mCanvas = sketch.createCanvas(sketch.windowWidth, sketch.windowHeight, sketch.WEBGL);
+    menuHeight = $('#my-menu').outerHeight();
+    let mWidth = sketch.windowWidth;
+    let mHeight = sketch.windowHeight - menuHeight;
+    let nHeight = Math.round(mWidth * 1080.0 / 1920.0);
+
+    if (nHeight < mHeight) {
+      mHeight = nHeight;
+    } else {
+      mWidth = Math.round(mHeight * 1920.0 / 1080.0);
+    }
+
+    const mCanvas = sketch.createCanvas(mWidth, mHeight, sketch.WEBGL);
+    mCanvas.parent('my-canvas-container');
     mCanvas.id('canvas3d');
     sketch.setAttributes('antialias', true);
     sketch.smooth();
@@ -240,7 +257,6 @@ const sketch3D = function(sketch) {
     sketch.frameRate(24);
 
     easycam = new Dw.EasyCam(this._renderer, CAM_INIT_STATE);
-    menuHeight = $('#my-menu').outerHeight();
 
     readNewJsonFiles();
   }
@@ -309,12 +325,6 @@ const sketch3D = function(sketch) {
 
     sketch.pop();
     checkKeys();
-  }
-
-  sketch.windowResized = function() {
-    sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
-    easycam.setViewport([0,0,sketch.windowWidth, sketch.windowHeight]);
-    menuHeight = $('#my-menu').outerHeight();
   }
 
   function checkKeys() {
@@ -444,17 +454,25 @@ $(() => {
       $('.emo-2d-box-label').removeClass('file-input-disable-2d');
       $('#my-line-thickness-label').removeClass('file-input-disable');
       $('#my-line-thickness').removeClass('file-input-disable');
+      $('#my-vertical-padding-2d-label').removeClass('file-input-disable');
+      $('#my-vertical-padding-2d').removeClass('file-input-disable');
     } else {
       $('.emo-2d-box').addClass('file-input-disable-2d');
       $('.emo-2d-box-label').addClass('file-input-disable-2d');
       $('#my-line-thickness-label').addClass('file-input-disable');
       $('#my-line-thickness').addClass('file-input-disable');
+      $('#my-vertical-padding-2d-label').addClass('file-input-disable');
+      $('#my-vertical-padding-2d').addClass('file-input-disable');
     }
   });
 
   $('#my-line-thickness').change(() => {
-    LINEWEIGHT2D = $('#my-line-thickness').val();
+    lineWeight2d = parseInt($('#my-line-thickness').val());
     create2d();
-    console.log('oaoa');
+  });
+
+  $('#my-vertical-padding-2d').change(() => {
+    m2dYpadding = parseInt($('#my-vertical-padding-2d').val());
+    create2d();
   });
 });

@@ -4,7 +4,6 @@ html, body {
 }
 
 .menu {
-  position: absolute;
   background-color: #fff;
   width: 100%;
   top: 0;
@@ -30,10 +29,21 @@ input[type=checkbox] {
   margin: 8px 32px 0 0;
 }
 
+.canvas-container {
+  position: relative;
+}
+
 #canvas2d {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 100;
   pointer-events: none;
+}
+
+#canvas3d {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
 }
