@@ -53,6 +53,8 @@ input[type=checkbox] {
   left: 0;
   z-index: 100;
   pointer-events: none;
+  transform-origin: top left;
+  transform: scale(0.5);
 }
 
 #canvas3d {
@@ -60,4 +62,6 @@ input[type=checkbox] {
   top: 0;
   left: 0;
   z-index: 1;
+  transform-origin: top left;
+  transform: scale(0.5);
 }

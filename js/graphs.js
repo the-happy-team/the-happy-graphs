@@ -16,9 +16,10 @@ let maxDim;
 let easycam;
 let menuHeight;
 
+const OVERSAMPLE = 2;
 let displayMode3D = 'AC';
-let m2dYpadding = 16;
-let lineWeight2d = 1;
+let m2dYpadding = OVERSAMPLE * 16;
+let lineWeight2d = OVERSAMPLE * 1;
 
 const DISPLAY = {
   LIGHTS: false,
@@ -39,7 +40,7 @@ const CAM_TRANS = {
 const CAM_TRANS_DELTA = 16;
 
 const CAM_INIT_STATE = {
-  distance : 2000,
+  distance : 2500,
   center   : [0, 0, 0],
   rotation : [Math.sqrt(2) / 2, -Math.sqrt(3) / 2, 0, 0]
 };
@@ -265,7 +266,7 @@ const sketch2D = function(sketch) {
       mWidth = Math.round(mHeight * 1920.0 / 1080.0);
     }
 
-    const mCanvas = sketch.createCanvas(mWidth, mHeight);
+    const mCanvas = sketch.createCanvas(OVERSAMPLE * mWidth, OVERSAMPLE * mHeight);
     mCanvas.parent('my-canvas-container');
     mCanvas.id('canvas2d');
     sketch.setAttributes('antialias', true);
@@ -306,7 +307,7 @@ const sketch3D = function(sketch) {
       mWidth = Math.round(mHeight * 1920.0 / 1080.0);
     }
 
-    const mCanvas = sketch.createCanvas(mWidth, mHeight, sketch.WEBGL);
+    const mCanvas = sketch.createCanvas(OVERSAMPLE * mWidth, OVERSAMPLE * mHeight, sketch.WEBGL);
     mCanvas.parent('my-canvas-container');
     mCanvas.id('canvas3d');
     sketch.setAttributes('antialias', true);
@@ -526,12 +527,12 @@ $(() => {
   });
 
   $('#my-line-thickness').change(() => {
-    lineWeight2d = parseInt($('#my-line-thickness').val());
+    lineWeight2d = OVERSAMPLE * parseInt($('#my-line-thickness').val());
     create2d();
   });
 
   $('#my-vertical-padding-2d').change(() => {
-    m2dYpadding = parseInt($('#my-vertical-padding-2d').val());
+    m2dYpadding = OVERSAMPLE * parseInt($('#my-vertical-padding-2d').val());
     create2d();
   });
 
