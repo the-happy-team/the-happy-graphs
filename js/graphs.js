@@ -157,36 +157,65 @@ function create3dPoints() {
   points.push([]);
 
   for(let p = 0; p < jsonA.values['happy'].length && p < jsonC.values['happy'].length; p++) {
+    const isLastP = ((p+1) >= jsonA.values['happy'].length) || ((p+1) >= jsonC.values['happy'].length);
+
+    if((p === 0) || isLastP) {
+      points[0].push(0);
+    }
     points[0].push(0);
+
     for(let ei = 0; ei < jsonA.header.length; ei++) {
       const emotion = jsonA.header[ei];
       const showEmotion = $(`input[name="${emotion}-3d"]`).is(':checked');
+      const valA = showEmotion ? jsonA.values[`${emotion}`][p] : 0;
+      const valC = showEmotion ? jsonC.values[`${emotion}`][p] : 0;
 
-      if(showEmotion) {
+      if(p == 0) {
+        const valAp = (valA < Z_MAX / 2) ? 0 : Z_MAX;
+        const valCp = (valC < Z_MAX / 2) ? 0 : Z_MAX;
+
         if(displayMode3D == 'AC') {
-          points[2 * ei + 0 + 1].push(jsonA.values[`${emotion}`][p]);
-          points[2 * ei + 1 + 1].push(jsonC.values[`${emotion}`][p]);
+          points[2 * ei + 0 + 1].push(valAp);
+          points[2 * ei + 1 + 1].push(valCp);
         } else if(displayMode3D == 'C') {
-          points[ei + 0 + 1].push(jsonC.values[`${emotion}`][p]);
+          points[ei + 0 + 1].push(valCp);
         } else if(displayMode3D == 'CC') {
-          points[ei + 0 + 1].push(jsonC.values[`${emotion}`][p]);
-          points[ei + jsonA.header.length + 1].push(jsonC.values[`${emotion}`][p]);
+          points[ei + 0 + 1].push(valCp);
+          points[ei + jsonA.header.length + 1].push(valCp);
         } else if(displayMode3D == 'CcCc') {
-          points[2 * ei + 0 + 1].push(jsonC.values[`${emotion}`][p]);
-          points[2 * ei + 1 + 1].push(jsonC.values[`${emotion}`][p]);
+          points[2 * ei + 0 + 1].push(valCp);
+          points[2 * ei + 1 + 1].push(valCp);
         }
-      } else {
+      }
+
+      if(displayMode3D == 'AC') {
+        points[2 * ei + 0 + 1].push(valA);
+        points[2 * ei + 1 + 1].push(valC);
+      } else if(displayMode3D == 'C') {
+        points[ei + 0 + 1].push(valC);
+      } else if(displayMode3D == 'CC') {
+        points[ei + 0 + 1].push(valC);
+        points[ei + jsonA.header.length + 1].push(valC);
+      } else if(displayMode3D == 'CcCc') {
+        points[2 * ei + 0 + 1].push(valC);
+        points[2 * ei + 1 + 1].push(valC);
+      }
+
+      if(isLastP) {
+        const valAp = (valA < Z_MAX / 2) ? 0 : Z_MAX;
+        const valCp = (valC < Z_MAX / 2) ? 0 : Z_MAX;
+
         if(displayMode3D == 'AC') {
-          points[2 * ei + 0 + 1].push(0);
-          points[2 * ei + 1 + 1].push(0);
+          points[2 * ei + 0 + 1].push(valAp);
+          points[2 * ei + 1 + 1].push(valCp);
         } else if(displayMode3D == 'C') {
-          points[ei + 0 + 1].push(0);
+          points[ei + 0 + 1].push(valCp);
         } else if(displayMode3D == 'CC') {
-          points[ei + 0 + 1].push(0);
-          points[ei + jsonA.header.length + 1].push(0);
+          points[ei + 0 + 1].push(valCp);
+          points[ei + jsonA.header.length + 1].push(valCp);
         } else if(displayMode3D == 'CcCc') {
-          points[2 * ei + 0 + 1].push(0);
-          points[2 * ei + 1 + 1].push(0);
+          points[2 * ei + 0 + 1].push(valCp);
+          points[2 * ei + 1 + 1].push(valCp);
         }
       }
     }
@@ -211,21 +240,15 @@ function create2d() {
     const numPoints = points[2 * ei + 1].length - 1;
     const showEmotion = $(`input[name="${emotion}-2d"]`).is(':checked');
 
-    let px = p53D.map(-1, -1, numPoints, 0, m2dGraph.width);
-    let py = p53D.map(points[2 * ei + 1][0], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
-    py = (py < m2dGraph.height / 2) ? m2dYpadding : m2dGraph.height - m2dYpadding;
-
     for(let p = 0; (showEmotion && (p < numPoints)); p++) {
-      const x0 = p53D.map(p, -1, numPoints, 0, m2dGraph.width);
+      const x0 = p53D.map(p, 0, numPoints, 0, m2dGraph.width);
       const y0 = p53D.map(points[2 * ei + 1][p], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
 
-      m2dGraph.line(px, py, x0, y0);
-      px = x0;
-      py = y0;
+      const x1 = p53D.map(p + 1, 0, numPoints, 0, m2dGraph.width);
+      const y1 = p53D.map(points[2 * ei + 1][p + 1], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+
+      m2dGraph.line(x0, y0, x1, y1);
     }
-    const x0 = p53D.map(numPoints, -1, numPoints, 0, m2dGraph.width);
-    const y0 = (py < m2dGraph.height / 2) ? m2dYpadding : m2dGraph.height - m2dYpadding;
-    m2dGraph.line(px, py, x0, y0);
   }
 }
 
