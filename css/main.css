@@ -17,7 +17,7 @@ html, body {
   outline: none;
 }
 
-.file-input-disable {
+.file-input-disable, .file-input-disable-2d {
   opacity: .3;
   pointer-events: none;
 }

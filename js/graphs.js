@@ -111,27 +111,19 @@ function smoothEmotionValues(mj, emo) {
 }
 
 function readNewJsonFiles() {
-  points.length = 0;
   preProcessJson(jsonA);
   preProcessJson(jsonC);
 
   for(let e of jsonA.header) {
     smoothEmotionValues(jsonA, e);
     smoothEmotionValues(jsonC, e);
-    points.push([]);
-    points.push([]);
   }
 
-  for(let p = 0; p < jsonA.values['happy'].length && p < jsonC.values['happy'].length; p++) {
-    for(let ei = 0; ei < jsonA.header.length; ei++) {
-      const emotion = jsonA.header[ei];
-      points[2 * ei + 0].push(jsonA.values[`${emotion}`][p]);
-      points[2 * ei + 1].push(jsonC.values[`${emotion}`][p]);
-    }
-  }
-
-  createEmoMenu();
+  createEmoMenu('2d', create2d);
+  createEmoMenu('3d', create3dPoints);
+  create3dPoints();
   create2d();
+
 
   gridStep = Math.max(p53D.height / points.length, p53D.width / points[0].length);
   maxDim = Math.max(gridStep * points.length, gridStep * points[0].length);
@@ -140,13 +132,41 @@ function readNewJsonFiles() {
   CAM_TRANS.z = -500;
 }
 
-function createEmoMenu() {
-  const mdiv = $('#my-emo-box-container');
+function createEmoMenu(dim = '2d', fun = create2d) {
+  const mdiv = $(`#my-emo-${dim}-box-container`);
   mdiv.empty();
+  mdiv.append(`${dim}: `);
 
   for(let e of jsonA.header) {
-    mdiv.append($(`<label for="${e}-2d">${e}</label>`).addClass('file-input-disable').addClass('emo-box-label'));
-    mdiv.append($(`<input name="${e}-2d" type="checkbox">`).click(create2d).attr('checked', true).addClass('file-input-disable').addClass('emo-box'));
+    mdiv.append($(`<label for="${e}-${dim}">${e}</label>`).addClass(`file-input-disable-${dim}`).addClass(`emo-${dim}-box-label`));
+    mdiv.append($(`<input name="${e}-${dim}" type="checkbox">`).click(fun).attr('checked', true).addClass(`file-input-disable-${dim}`).addClass(`emo-${dim}-box`));
+  }
+}
+
+function create3dPoints() {
+  points.length = 0;
+  points.push([]);
+  for(let e of jsonA.header) {
+    points.push([]);
+    points.push([]);
+  }
+  points.push([]);
+
+  for(let p = 0; p < jsonA.values['happy'].length && p < jsonC.values['happy'].length; p++) {
+    points[0].push(0);
+    for(let ei = 0; ei < jsonA.header.length; ei++) {
+      const emotion = jsonA.header[ei];
+      const showEmotion = $(`input[name="${emotion}-3d"]`).is(':checked');
+
+      if(showEmotion) {
+        points[2 * ei + 0 + 1].push(jsonA.values[`${emotion}`][p]);
+        points[2 * ei + 1 + 1].push(jsonC.values[`${emotion}`][p]);
+      } else {
+        points[2 * ei + 0 + 1].push(0);
+        points[2 * ei + 1 + 1].push(0);
+      }
+    }
+    points[2 * jsonA.header.length + 1].push(0);
   }
 }
 
@@ -157,16 +177,17 @@ function create2d() {
   m2dGraph.strokeWeight(LINEWEIGHT2D);
   m2dGraph.noFill();
 
-  for(let ei = 0; ei < points.length / 2; ei++) {
+  for(let ei = 0; ei < jsonA.header.length; ei++) {
     const emotion = jsonA.header[ei];
+    const numPoints = points[2 * ei + 1].length - 1;
     const showEmotion = $(`input[name="${emotion}-2d"]`).is(':checked');
 
-    for(let p = 0; (showEmotion && p < points[2 * ei].length - 1); p++) {
-      const x0 = p53D.map(p, 0, points[2 * ei].length - 1, 0, m2dGraph.width);
-      const y0 = p53D.map(points[2 * ei][p], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+    for(let p = 0; (showEmotion && p < numPoints); p++) {
+      const x0 = p53D.map(p, 0, numPoints, 0, m2dGraph.width);
+      const y0 = p53D.map(points[2 * ei + 1][p], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
 
-      const x1 = p53D.map(p + 1, 0, points[2 * ei].length - 1, 0, m2dGraph.width);
-      const y1 = p53D.map(points[2 * ei][p + 1], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+      const x1 = p53D.map(p + 1, 0, numPoints, 0, m2dGraph.width);
+      const y1 = p53D.map(points[2 * ei + 1][p + 1], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
 
       m2dGraph.line(x0, y0, x1, y1);
     }
@@ -285,6 +306,7 @@ const sketch3D = function(sketch) {
         sketch.pop();
       }
     }
+
     sketch.pop();
     checkKeys();
   }
@@ -418,13 +440,13 @@ $(() => {
   $('#my-2d-box').click(() => {
     SHOW2D = $('#my-2d-box').is(":checked");
     if(SHOW2D){
-      $('.emo-box').removeClass('file-input-disable');
-      $('.emo-box-label').removeClass('file-input-disable');
+      $('.emo-2d-box').removeClass('file-input-disable-2d');
+      $('.emo-2d-box-label').removeClass('file-input-disable-2d');
       $('#my-line-thickness-label').removeClass('file-input-disable');
       $('#my-line-thickness').removeClass('file-input-disable');
     } else {
-      $('.emo-box').addClass('file-input-disable');
-      $('.emo-box-label').addClass('file-input-disable');
+      $('.emo-2d-box').addClass('file-input-disable-2d');
+      $('.emo-2d-box-label').addClass('file-input-disable-2d');
       $('#my-line-thickness-label').addClass('file-input-disable');
       $('#my-line-thickness').addClass('file-input-disable');
     }
