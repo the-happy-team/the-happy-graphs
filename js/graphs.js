@@ -181,15 +181,21 @@ function create2d() {
     const numPoints = points[2 * ei + 1].length - 1;
     const showEmotion = $(`input[name="${emotion}-2d"]`).is(':checked');
 
-    for(let p = 0; (showEmotion && p < numPoints); p++) {
-      const x0 = p53D.map(p, 0, numPoints, 0, m2dGraph.width);
+    let px = p53D.map(-1, -1, numPoints, 0, m2dGraph.width);
+    let py = p53D.map(points[2 * ei + 1][0], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+    py = (py < m2dGraph.height / 2) ? m2dYpadding : m2dGraph.height - m2dYpadding;
+
+    for(let p = 0; (showEmotion && (p < numPoints)); p++) {
+      const x0 = p53D.map(p, -1, numPoints, 0, m2dGraph.width);
       const y0 = p53D.map(points[2 * ei + 1][p], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
 
-      const x1 = p53D.map(p + 1, 0, numPoints, 0, m2dGraph.width);
-      const y1 = p53D.map(points[2 * ei + 1][p + 1], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
-
-      m2dGraph.line(x0, y0, x1, y1);
+      m2dGraph.line(px, py, x0, y0);
+      px = x0;
+      py = y0;
     }
+    const x0 = p53D.map(numPoints, -1, numPoints, 0, m2dGraph.width);
+    const y0 = (py < m2dGraph.height / 2) ? m2dYpadding : m2dGraph.height - m2dYpadding;
+    m2dGraph.line(px, py, x0, y0);
   }
 }
 
