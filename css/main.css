@@ -37,6 +37,16 @@ input[type=checkbox] {
   position: relative;
 }
 
+.emo-box-container-inline {
+  display: inline;
+}
+
+.save-button {
+  display: inline;
+  outline: none;
+  user-select: none;
+}
+
 #canvas2d {
   position: absolute;
   top: 0;

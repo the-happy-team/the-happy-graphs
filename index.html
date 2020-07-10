@@ -3,6 +3,7 @@
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/freshfork/p5.EasyCam@1.0.10/p5.easycam.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
     <link rel="stylesheet" type="text/css" href="./css/main.css">
   </head>
   <body>
@@ -48,15 +49,18 @@
         <option value="CcCc">CcCc</option>
       </select>
 
-      <div id="my-emo-3d-box-container" class="emo-3d-box-container">
+      <div id="my-emo-3d-box-container" class="emo-box-container">
         <label for="spacer">.</label>
         <input name="spacer" type="checkbox">
       </div>
 
-      <div id="my-emo-2d-box-container" class="emo-2d-box-container">
+      <div id="my-emo-2d-box-container" class="emo-box-container emo-box-container-inline">
         <label for="spacer">.</label>
         <input name="spacer" type="checkbox">
       </div>
+
+      <button id="my-save-button" class="save-button">salvar imagem</button>
+
     </div>
     <div id="my-canvas-container" class="canvas-container"></div>
   </body>

@@ -539,4 +539,24 @@ $(() => {
     displayMode3D = $('#my-show-artist-3d').val();
     create3dPoints();
   });
+
+  $('#my-save-button').click(() => {
+    const mCanvasSave = document.createElement('canvas');
+    const mDownloadHref = document.createElement('a');
+    const m2dCanvas = document.getElementById('canvas2d');
+    const m3dCanvas = document.getElementById('canvas3d');
+    const mCanvasSaveCtx = mCanvasSave.getContext('2d');
+
+    mCanvasSave.width = m2dCanvas.width;
+    mCanvasSave.height = m2dCanvas.height;
+
+    mCanvasSaveCtx.drawImage(m3dCanvas, 0, 0);
+    mCanvasSaveCtx.drawImage(m2dCanvas, 0, 0);
+
+    const mPNGURL = mCanvasSave.toDataURL('image/png').replace(/^data:image\/[^;]*/,
+                                                               'data:application/octet-stream');
+    mDownloadHref.setAttribute('download', `happy_${moment().format('YYYYMMDD__HHmmss')}.png`);
+    mDownloadHref.setAttribute('href', mPNGURL);
+    setTimeout(() => mDownloadHref.click(), 100);
+  });
 });
