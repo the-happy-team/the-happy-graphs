@@ -9,7 +9,8 @@ let jsonCLoaded = false;
 const Z_MAX = 500;
 const V_FILTER = 0.005;
 
-const points = [];
+const points3D = [];
+const points2D = [];
 let gridStep;
 let maxDim;
 
@@ -123,14 +124,14 @@ function readNewJsonFiles() {
   }
 
   createEmoMenu('2d', create2d);
-  createEmoMenu('3d', create3dPoints);
-  create3dPoints();
+  createEmoMenu('3d', create2d3dPoints);
+  create2d3dPoints();
   create2d();
 
-  gridStep = Math.max(p53D.height / points.length, p53D.width / points[0].length);
-  maxDim = Math.max(gridStep * points.length, gridStep * points[0].length);
-  CAM_TRANS.x = -0.5 * gridStep * points[0].length;
-  CAM_TRANS.y = -0.5 * gridStep * points.length;
+  gridStep = Math.max(p53D.height / points3D.length, p53D.width / points3D[0].length);
+  maxDim = Math.max(gridStep * points3D.length, gridStep * points3D[0].length);
+  CAM_TRANS.x = -0.5 * gridStep * points3D[0].length;
+  CAM_TRANS.y = -0.5 * gridStep * points3D.length;
   CAM_TRANS.z = -500;
 }
 
@@ -145,87 +146,96 @@ function createEmoMenu(dim = '2d', fun = create2d) {
   }
 }
 
-function create3dPoints() {
-  points.length = 0;
-  points.push([]);
+function create2d3dPoints() {
+  points3D.length = 0;
+  points3D.push([]);
+  points2D.length = 0;
+  points2D.push([]);
 
   for(let e of jsonA.header) {
-    points.push([]);
+    points3D.push([]);
+    points2D.push([]);
     if(displayMode3D != 'C') {
-      points.push([]);
+      points3D.push([]);
     }
   }
-  points.push([]);
+  points3D.push([]);
+  points2D.push([]);
 
   for(let p = 0; p < jsonA.values['happy'].length && p < jsonC.values['happy'].length; p++) {
     const isLastP = ((p+1) >= jsonA.values['happy'].length) || ((p+1) >= jsonC.values['happy'].length);
 
     if((p === 0) || isLastP) {
-      points[0].push(0);
+      points3D[0].push(0);
+      points2D.push([]);
     }
-    points[0].push(0);
+    points3D[0].push(0);
+    points2D.push([]);
 
     for(let ei = 0; ei < jsonA.header.length; ei++) {
       const emotion = jsonA.header[ei];
       const showEmotion = $(`input[name="${emotion}-3d"]`).is(':checked');
+
       const valA = showEmotion ? jsonA.values[`${emotion}`][p] : 0;
       const valC = showEmotion ? jsonC.values[`${emotion}`][p] : 0;
+      const valApad = (valA < Z_MAX / 2) ? 0 : Z_MAX;
+      const valCpad = (valC < Z_MAX / 2) ? 0 : Z_MAX;
+      const valA2D = jsonA.values[`${emotion}`][p];
+      const valA2Dpad = (valA2D < Z_MAX / 2) ? 0 : Z_MAX;
 
       if(p == 0) {
-        const valAp = (valA < Z_MAX / 2) ? 0 : Z_MAX;
-        const valCp = (valC < Z_MAX / 2) ? 0 : Z_MAX;
-
         if(displayMode3D == 'AC') {
-          points[2 * ei + 0 + 1].push(valAp);
-          points[2 * ei + 1 + 1].push(valCp);
+          points3D[2 * ei + 0 + 1].push(valApad);
+          points3D[2 * ei + 1 + 1].push(valCpad);
         } else if(displayMode3D == 'C') {
-          points[ei + 0 + 1].push(valCp);
+          points3D[ei + 0 + 1].push(valCpad);
         } else if(displayMode3D == 'CC') {
-          points[ei + 0 + 1].push(valCp);
-          points[ei + jsonA.header.length + 1].push(valCp);
+          points3D[ei + 0 + 1].push(valCpad);
+          points3D[ei + jsonA.header.length + 1].push(valCpad);
         } else if(displayMode3D == 'CcCc') {
-          points[2 * ei + 0 + 1].push(valCp);
-          points[2 * ei + 1 + 1].push(valCp);
+          points3D[2 * ei + 0 + 1].push(valCpad);
+          points3D[2 * ei + 1 + 1].push(valCpad);
         }
+        points2D[ei + 1].push(valA2Dpad);
       }
 
       if(displayMode3D == 'AC') {
-        points[2 * ei + 0 + 1].push(valA);
-        points[2 * ei + 1 + 1].push(valC);
+        points3D[2 * ei + 0 + 1].push(valA);
+        points3D[2 * ei + 1 + 1].push(valC);
       } else if(displayMode3D == 'C') {
-        points[ei + 0 + 1].push(valC);
+        points3D[ei + 0 + 1].push(valC);
       } else if(displayMode3D == 'CC') {
-        points[ei + 0 + 1].push(valC);
-        points[ei + jsonA.header.length + 1].push(valC);
+        points3D[ei + 0 + 1].push(valC);
+        points3D[ei + jsonA.header.length + 1].push(valC);
       } else if(displayMode3D == 'CcCc') {
-        points[2 * ei + 0 + 1].push(valC);
-        points[2 * ei + 1 + 1].push(valC);
+        points3D[2 * ei + 0 + 1].push(valC);
+        points3D[2 * ei + 1 + 1].push(valC);
       }
+      points2D[ei + 1].push(valA2D);
 
       if(isLastP) {
-        const valAp = (valA < Z_MAX / 2) ? 0 : Z_MAX;
-        const valCp = (valC < Z_MAX / 2) ? 0 : Z_MAX;
-
         if(displayMode3D == 'AC') {
-          points[2 * ei + 0 + 1].push(valAp);
-          points[2 * ei + 1 + 1].push(valCp);
+          points3D[2 * ei + 0 + 1].push(valApad);
+          points3D[2 * ei + 1 + 1].push(valCpad);
         } else if(displayMode3D == 'C') {
-          points[ei + 0 + 1].push(valCp);
+          points3D[ei + 0 + 1].push(valCpad);
         } else if(displayMode3D == 'CC') {
-          points[ei + 0 + 1].push(valCp);
-          points[ei + jsonA.header.length + 1].push(valCp);
+          points3D[ei + 0 + 1].push(valCpad);
+          points3D[ei + jsonA.header.length + 1].push(valCpad);
         } else if(displayMode3D == 'CcCc') {
-          points[2 * ei + 0 + 1].push(valCp);
-          points[2 * ei + 1 + 1].push(valCp);
+          points3D[2 * ei + 0 + 1].push(valCpad);
+          points3D[2 * ei + 1 + 1].push(valCpad);
         }
+        points2D[ei + 1].push(valA2Dpad);
       }
     }
 
     if(displayMode3D == 'C') {
-      points[jsonA.header.length + 1].push(0);
+      points3D[jsonA.header.length + 1].push(0);
     } else {
-      points[2 * jsonA.header.length + 1].push(0);
+      points3D[2 * jsonA.header.length + 1].push(0);
     }
+    points2D[jsonA.header.length + 1].push(0);
   }
 }
 
@@ -238,15 +248,15 @@ function create2d() {
 
   for(let ei = 0; ei < jsonA.header.length; ei++) {
     const emotion = jsonA.header[ei];
-    const numPoints = points[2 * ei + 1].length - 1;
+    const numPoints = points2D[ei + 1].length - 1;
     const showEmotion = $(`input[name="${emotion}-2d"]`).is(':checked');
 
     for(let p = 0; (showEmotion && (p < numPoints)); p++) {
       const x0 = p53D.map(p, 0, numPoints, 0, m2dGraph.width);
-      const y0 = p53D.map(points[2 * ei + 1][p], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+      const y0 = p53D.map(points2D[ei + 1][p], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
 
       const x1 = p53D.map(p + 1, 0, numPoints, 0, m2dGraph.width);
-      const y1 = p53D.map(points[2 * ei + 1][p + 1], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+      const y1 = p53D.map(points2D[ei + 1][p + 1], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
 
       m2dGraph.line(x0, y0, x1, y1);
     }
@@ -346,14 +356,14 @@ const sketch3D = function(sketch) {
       sketch.ambientLight(200,200,200);
     }
 
-    for(let h = 0; h < points.length - 1; h++) {
+    for(let h = 0; h < points3D.length - 1; h++) {
       const y0 = gridStep * (h + 0);
       const y1 = gridStep * (h + 1);
 
       const y0n = y0 / maxDim;
       const y1n = y1 / maxDim;
 
-      for(let w = 0; w < points[h].length - 1; w++) {
+      for(let w = 0; w < points3D[h].length - 1; w++) {
         const x0 = gridStep * (w + 0);
         const x1 = gridStep * (w + 1);
 
@@ -363,20 +373,20 @@ const sketch3D = function(sketch) {
         sketch.push();
         sketch.beginShape();
         if (DISPLAY.TILE) {
-          sketch.vertex(x0, y0, points[h][w], 0, 0);
-          sketch.vertex(x1, y0, points[h][w + 1], 1, 0);
-          sketch.vertex(x1, y1, points[h + 1][w + 1], 1, 1);
-          sketch.vertex(x0, y1, points[h + 1][w], 0, 1);
+          sketch.vertex(x0, y0, points3D[h][w], 0, 0);
+          sketch.vertex(x1, y0, points3D[h][w + 1], 1, 0);
+          sketch.vertex(x1, y1, points3D[h + 1][w + 1], 1, 1);
+          sketch.vertex(x0, y1, points3D[h + 1][w], 0, 1);
         } else if (DISPLAY.TEXTURE) {
-          sketch.vertex(x0, y0, points[h][w], x0n, y0n);
-          sketch.vertex(x1, y0, points[h][w + 1], x1n, y0n);
-          sketch.vertex(x1, y1, points[h + 1][w + 1], x1n, y1n);
-          sketch.vertex(x0, y1, points[h + 1][w], x0n, y1n);
+          sketch.vertex(x0, y0, points3D[h][w], x0n, y0n);
+          sketch.vertex(x1, y0, points3D[h][w + 1], x1n, y0n);
+          sketch.vertex(x1, y1, points3D[h + 1][w + 1], x1n, y1n);
+          sketch.vertex(x0, y1, points3D[h + 1][w], x0n, y1n);
         } else {
-          sketch.vertex(x0, y0, points[h][w]);
-          sketch.vertex(x1, y0, points[h][w + 1]);
-          sketch.vertex(x1, y1, points[h + 1][w + 1]);
-          sketch.vertex(x0, y1, points[h + 1][w]);
+          sketch.vertex(x0, y0, points3D[h][w]);
+          sketch.vertex(x1, y0, points3D[h][w + 1]);
+          sketch.vertex(x1, y1, points3D[h + 1][w + 1]);
+          sketch.vertex(x0, y1, points3D[h + 1][w]);
         }
         sketch.endShape(sketch.CLOSE);
         sketch.pop();
@@ -538,7 +548,7 @@ $(() => {
 
   $('#my-show-artist-3d').change(() => {
     displayMode3D = $('#my-show-artist-3d').val();
-    create3dPoints();
+    create2d3dPoints();
   });
 
   $('#my-save-button').click(() => {
