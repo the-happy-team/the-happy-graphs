@@ -253,10 +253,10 @@ function create2d() {
 
     for(let p = 0; (showEmotion && (p < numPoints)); p++) {
       const x0 = p53D.map(p, 0, numPoints, 0, m2dGraph.width);
-      const y0 = p53D.map(points2D[ei + 1][p], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+      const y0 = p53D.map(points2D[ei + 1][p], 0, Z_MAX, m2dGraph.height - m2dYpadding, m2dYpadding);
 
       const x1 = p53D.map(p + 1, 0, numPoints, 0, m2dGraph.width);
-      const y1 = p53D.map(points2D[ei + 1][p + 1], 0, Z_MAX, m2dYpadding, m2dGraph.height - m2dYpadding);
+      const y1 = p53D.map(points2D[ei + 1][p + 1], 0, Z_MAX, m2dGraph.height - m2dYpadding, m2dYpadding);
 
       m2dGraph.line(x0, y0, x1, y1);
     }
