@@ -49,8 +49,6 @@ const CAM_INIT_STATE = {
 function preProcessJson(mj) {
   mj.header = mj.header.filter((e) => e != 'time');
   mj.header.push(mj.header.splice(mj.header.indexOf('neutral'), 1)[0]);
-  //mj.values['neutral'].forEach((v, i, arr) => arr[i] = (1.0 - v));
-  //mj.values['neutral'].reverse();
 
   for(let e of jsonA.header) {
     jsonA.values[`${e}_f`] = [];
