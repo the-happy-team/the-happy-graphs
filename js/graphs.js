@@ -14,7 +14,7 @@ const points2D = [];
 let gridStep;
 let maxDim;
 
-let easycam;
+let mCam;
 let menuHeight;
 
 const OVERSAMPLE = 2;
@@ -324,12 +324,16 @@ const sketch3D = function(sketch) {
     sketch.randomSeed(1010);
     sketch.frameRate(24);
 
-    easycam = new Dw.EasyCam(this._renderer, CAM_INIT_STATE);
+    mCam = sketch.createSimpleCam();
+    mCam.zoom = new Damp(1500, -5, 0.07, [-4000, 4000]);
+    mCam.rx = new Damp(-Math.PI / 2, 0.01, 0.1);
+    mCam.ry = new Damp(0 / 2, 0.01, 0.1);
 
     readNewJsonFiles();
   }
 
   sketch.draw = function() {
+    mCam.apply();
     sketch.background(0);
     sketch.strokeWeight(3);
     sketch.stroke(255);
