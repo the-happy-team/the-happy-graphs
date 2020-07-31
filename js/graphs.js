@@ -424,7 +424,7 @@ const p53D = new p5(sketch3D);
 const p52D = new p5(sketch2D);
 
 $(() => {
-  $(".file-input-json").change((event) => {
+  $('.file-input-json').change((event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
 
@@ -452,7 +452,7 @@ $(() => {
     reader.readAsText(file);
   });
 
-  $(".file-input-image").change((event) => {
+  $('.file-input-image').change((event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
 
